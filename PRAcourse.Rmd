@@ -43,7 +43,7 @@ bibliography:
 ## Prerequisites
 - R and R Studio installed
 - PRAbook code tested?
-  - https://doi.org/10.1007/978-3-031-16333-3_5
+  - New GitHub repository
 - Participants will be familiar with R, but let them know which R-packages need to be installed.
 - Make slides freely available to all!
 
