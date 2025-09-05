@@ -1,0 +1,456 @@
+---
+title: "Probabilistic Risk Analysis and Bayesian Decision Theory"
+author:
+  - Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
+  - Mark Brewer^[BioSS Office, The James Hutton Institute, Craigiebuckler, Aberdeen AB15 8QH]
+knit: "rmarkdown::render"
+output: pdf_document
+# csl: environmental-modelling-and-software.csl
+bibliography: PRA_BDT.bib
+---
+
+```{r, results="hide", message=FALSE}
+  knitr::opts_chunk$set( collapse=TRUE, echo=F, comment=">" )
+  library( geodata )
+  library( terra )
+```
+
+```{r}
+  set.seed(1)
+```
+
+
+
+\clearpage
+# Linkages between PRA and BDT {#ChIntroLinkagesPRABDT}
+
+```{r PRA}
+  PRA <- function( x, z, thr=0 ) {
+    n       <- length(x)     ; H         <- which(x < thr) ; n_H <- length(H)
+    Ez_H    <- mean( z[ H] ) ; s_Ez_H    <- sqrt( var(z[ H]) /    n_H  )
+    Ez_notH <- mean( z[-H] ) ; s_Ez_notH <- sqrt( var(z[-H]) / (n-n_H) )
+    pH      <- n_H / n       ; V         <- Ez_notH - Ez_H ; R  <- pH * V
+    s_pH    <- sqrt( pH*(1-pH) / n )
+    s_V     <- sqrt( s_Ez_H^2 + s_Ez_notH^2 )
+    s_R     <- sqrt( s_pH^2*s_V^2 + s_pH^2*V^2 + pH^2*s_V^2 )
+    return( c(pH=pH,V=V,R=R,s_pH=s_pH,s_V=s_V,s_R=s_R) )
+  }
+```
+
+
+```{r}
+  load( "data/tmpBDTexample.RData" )
+  na <- length(a.seq )
+  np <- length(x.smp1)
+```
+
+```{r PRABDT, echo=F, out.width="100%", fig.height=4, fig.align="center", fig.cap="PRAs on data generated for BDT."}
+  thr <- 0
+  PRA.BDT1 <- sapply( 1:na, function(i){ PRA( x.smp1+a.seq[i], u.tbl1[,i], thr ) } )
+  PRA.BDT2 <- sapply( 1:na, function(i){ PRA( x.smp2+a.seq[i], u.tbl2[,i], thr ) } )
+  PRA.BDT3 <- sapply( 1:na, function(i){ PRA( x.smp3+a.seq[i], u.tbl3[,i], thr ) } )
+
+  par( mfrow=c(1,3), mar=c(4,2,3,0) )
+  pHlim <- range( c( 0, PRA.BDT1["pH",], PRA.BDT2["pH",], PRA.BDT3["pH",] ) )
+  Vlim  <- range( c( 0, PRA.BDT1["V" ,], PRA.BDT2["V" ,], PRA.BDT3["V" ,] ), na.rm=T )
+  
+  plot  ( a.seq, PRA.BDT1["pH",], type="l", ylim=pHlim,
+          main="p[H]", xlab="a", ylab="")
+  points( a.seq, PRA.BDT2["pH",], type="l", lty=2 )
+  points( a.seq, PRA.BDT3["pH",], type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75 )
+
+  plot  ( a.seq, PRA.BDT1["V",], col="black", type="l", ylim=Vlim,
+          main="V", xlab="a", ylab="" )
+  points( a.seq, PRA.BDT2["V",], col="black", type="l", lty=2 )
+  points( a.seq, PRA.BDT3["V",], col="black", type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75 )
+
+  plot  ( a.seq, PRA.BDT1["R",], col="black", type="l", ylim=Vlim,
+          main="R", xlab="a", ylab="" )
+  points( a.seq, PRA.BDT2["R",], col="black", type="l", lty=2 )
+  points( a.seq, PRA.BDT3["R",], col="black", type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+```
+
+## Risk management
+
+## The relationship between utility maximisation in BDT and risk assessment in PRA: $R_c$
+
+\begin{equation}
+  R = E[u|\neg H] - E[u].
+\end{equation}
+
+\begin{equation}
+\begin{aligned}
+  R_c &= R - E[u|\neg H] \\
+      &= R + E[ka|\neg H] \times a - E[ky \times y|\neg H].
+  (\#eq:Rc)
+\end{aligned}
+\end{equation}
+
+```{r PRABDTc, echo=F, out.width="100%", fig.height=4, fig.align="center", fig.cap="Impact of action $a$ on risk calculated from data generated for BDT. Left: uncorrected risk $R$, always decreasing with increasing $a$. Right: corrected risk $R_c$, reaching an uncertainty-dependent minimum at finite $a$."}
+  y.tbl1 <- y.tbl2 <- y.tbl3 <- NULL
+  for(i in 1:np) {
+    y.tbl1 <- rbind( y.tbl1, fy(a.seq,x.smp1[i],t.smp1[i]) + e.smp1[i] )
+    y.tbl2 <- rbind( y.tbl2, fy(a.seq,x.smp2[i],t.smp2[i]) + e.smp2[i] )
+    y.tbl3 <- rbind( y.tbl3, fy(a.seq,x.smp3[i],t.smp3[i]) + e.smp3[i] )
+  }
+
+  h.lst1 <- h.lst2 <- h.lst3 <- vector( "list", na )
+  for(i in 1:na) {
+    h.lst1[[i]] <- which( (a.seq[i]+x.smp1) > thr )
+    h.lst2[[i]] <- which( (a.seq[i]+x.smp2) > thr )
+    h.lst3[[i]] <- which( (a.seq[i]+x.smp3) > thr )
+  }
+  
+  benefits.mnabove.seq1 <- benefits.mnabove.seq2 <- benefits.mnabove.seq3 <- rep(NA,na)
+  costs.mnabove.seq1    <- costs.mnabove.seq2    <- costs.mnabove.seq3    <- rep(NA,na)
+  for(i in 1:na) {
+    benefits.mnabove.seq1[i] <- mean( (ky.smp1*y.tbl1[,i])[ h.lst1[[i]] ] )
+    benefits.mnabove.seq2[i] <- mean( (ky.smp2*y.tbl2[,i])[ h.lst2[[i]] ] )
+    benefits.mnabove.seq3[i] <- mean( (ky.smp3*y.tbl3[,i])[ h.lst3[[i]] ] )
+    costs.mnabove.seq1   [i] <- a.seq[i] * mean( ka.smp1  [ h.lst1[[i]] ] )
+    costs.mnabove.seq2   [i] <- a.seq[i] * mean( ka.smp2  [ h.lst2[[i]] ] )
+    costs.mnabove.seq3   [i] <- a.seq[i] * mean( ka.smp3  [ h.lst3[[i]] ] )
+  }
+
+  Rc.seq1  <- PRA.BDT1["R",] + costs.mnabove.seq1 - benefits.mnabove.seq1
+  Rc.seq2  <- PRA.BDT2["R",] + costs.mnabove.seq2 - benefits.mnabove.seq2
+  Rc.seq3  <- PRA.BDT3["R",] + costs.mnabove.seq3 - benefits.mnabove.seq3
+  imaxRc.1 <- which( Rc.seq1 == min(Rc.seq1,na.rm=T) ) ; amaxRc.1 <- a.seq[imaxRc.1]
+  imaxRc.2 <- which( Rc.seq2 == min(Rc.seq2,na.rm=T) ) ; amaxRc.2 <- a.seq[imaxRc.2]
+  imaxRc.3 <- which( Rc.seq3 == min(Rc.seq3,na.rm=T) ) ; amaxRc.3 <- a.seq[imaxRc.3]
+    
+  par( mfrow=c(1,2), mar=c(4,2,3,0) )
+  Rlim   <- range( 0, PRA.BDT1["R" ,], PRA.BDT2["R" ,], PRA.BDT3["R" ,], na.rm=T )
+  Rclim  <- range( 0, Rc.seq1, Rc.seq2, Rc.seq3, na.rm=T )
+  RRclim <- range( Rlim, Rclim )
+  
+  plot  ( a.seq, PRA.BDT1["R",], col="red"  , type="l",
+          main="R", xlab="a", ylab="", ylim=RRclim )
+  points( a.seq, PRA.BDT2["R",], col="red"  , type="l", lty=2 )
+  points( a.seq, PRA.BDT3["R",], col="red"  , type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+  
+  plot  ( a.seq, Rc.seq1, col="red"  , type="l",
+          main="Rc", xlab="a", ylab="", ylim=RRclim )
+  points( a.seq, Rc.seq2, col="red"  , type="l", lty=2 )
+  points( a.seq, Rc.seq3, col="red"  , type="l", lty=3 )
+  abline( v=amaxRc.1    , col="black", lty=1 )
+  abline( v=amaxRc.2    , col="black", lty=2 )
+  abline( v=amaxRc.3    , col="black", lty=3 )
+  text( amaxRc.1, min(Rc.seq1,na.rm=T), labels=paste("a_opt =",amaxRc.1 ), pos=4 )
+  text( amaxRc.2, min(Rc.seq2,na.rm=T), labels=paste("a_opt =",amaxRc.2 ), pos=4 )
+  text( amaxRc.3, min(Rc.seq3,na.rm=T), labels=paste("a_opt =",amaxRc.3 ), pos=4 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+```
+
+## Simplified accounting for both benefits and costs of the action: $R_b$
+
+\begin{equation}
+  R_b = R + E[ka] \times a - E[ky] \times E[y].
+  (\#eq:Rb)
+\end{equation}
+
+```{r PRABDTb, echo=F, out.width="100%", fig.height=4, fig.align="center", fig.cap="Cost- and benefit-adjusted risk $R_b$ using data generated for BDT."}
+  y.tbl1 <- y.tbl2 <- y.tbl3 <- NULL
+  for(i in 1:np) {
+    y.tbl1 <- rbind( y.tbl1, fy(a.seq,x.smp1[i],t.smp1[i]) + e.smp1[i] )
+    y.tbl2 <- rbind( y.tbl2, fy(a.seq,x.smp2[i],t.smp2[i]) + e.smp2[i] )
+    y.tbl3 <- rbind( y.tbl3, fy(a.seq,x.smp3[i],t.smp3[i]) + e.smp3[i] )
+  }
+
+  ymn.seq1 <- colMeans(y.tbl1)
+  ymn.seq2 <- colMeans(y.tbl2)
+  ymn.seq3 <- colMeans(y.tbl3)
+  Rb.seq1  <- PRA.BDT1["R",] + mean(ka.smp1) * a.seq - mean(ky.smp1) * ymn.seq1
+  Rb.seq2  <- PRA.BDT2["R",] + mean(ka.smp2) * a.seq - mean(ky.smp2) * ymn.seq2
+  Rb.seq3  <- PRA.BDT3["R",] + mean(ka.smp3) * a.seq - mean(ky.smp3) * ymn.seq3
+  imaxRb.1 <- which( Rb.seq1 == min(Rb.seq1,na.rm=T) ) ; amaxRb.1 <- a.seq[imaxRb.1]
+  imaxRb.2 <- which( Rb.seq2 == min(Rb.seq2,na.rm=T) ) ; amaxRb.2 <- a.seq[imaxRb.2]
+  imaxRb.3 <- which( Rb.seq3 == min(Rb.seq3,na.rm=T) ) ; amaxRb.3 <- a.seq[imaxRb.3]
+    
+  par( mfrow=c(1,2), mar=c(4,2,3,0) )
+  Rblim  <- range( 0, Rb.seq1, Rb.seq2, Rb.seq3, na.rm=T )
+  RRblim <- range( Rlim, Rblim )
+  
+  plot  ( a.seq, PRA.BDT1["R",], col="red"  , type="l",
+          main="R", xlab="a", ylab="", ylim=RRblim )
+  points( a.seq, PRA.BDT2["R",], col="red"  , type="l", lty=2 )
+  points( a.seq, PRA.BDT3["R",], col="red"  , type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+  
+  plot  ( a.seq, Rb.seq1, col="red"  , type="l",
+          main="Rb", xlab="a", ylab="", ylim=RRblim )
+  points( a.seq, Rb.seq2, col="red"  , type="l", lty=2 )
+  points( a.seq, Rb.seq3, col="red"  , type="l", lty=3 )
+  abline( v=amaxRb.1    , col="black", lty=1 )
+  abline( v=amaxRb.2    , col="black", lty=2 )
+  abline( v=amaxRb.3    , col="black", lty=3 )
+  text( amaxRb.1, min(Rb.seq1,na.rm=T), labels=paste("a_opt =",amaxRb.1 ), pos=4 )
+  text( amaxRb.2, min(Rb.seq2,na.rm=T), labels=paste("a_opt =",amaxRb.2 ), pos=4 )
+  text( amaxRb.3, min(Rb.seq3,na.rm=T), labels=paste("a_opt =",amaxRb.3 ), pos=4 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+```
+
+## Only correcting for costs: $R_a$
+
+\begin{equation}
+  R_a = R + E[ka] \times a.
+\end{equation}
+
+```{r PRABDTa, echo=F, out.width="100%", fig.height=4, fig.align="center", fig.cap="Cost-adjusted risk $R_a$ using data generated for BDT."}
+  Ra.seq1  <- PRA.BDT1["R",] + a.seq * mean(ka.smp1)
+  Ra.seq2  <- PRA.BDT2["R",] + a.seq * mean(ka.smp2)
+  Ra.seq3  <- PRA.BDT3["R",] + a.seq * mean(ka.smp3)
+  imaxRa.1 <- which( Ra.seq1 == min(Ra.seq1,na.rm=T) ) ; amaxRa.1 <- a.seq[imaxRa.1]
+  imaxRa.2 <- which( Ra.seq2 == min(Ra.seq2,na.rm=T) ) ; amaxRa.2 <- a.seq[imaxRa.2]
+  imaxRa.3 <- which( Ra.seq3 == min(Ra.seq3,na.rm=T) ) ; amaxRa.3 <- a.seq[imaxRa.3]
+
+  par( mfrow=c(1,2), mar=c(4,2,3,0) )
+  Ralim  <- range( 0, Ra.seq1, Ra.seq2, Ra.seq3, na.rm=T )
+  RRalim <- range( Rlim, Ralim )
+  
+  plot  ( a.seq, PRA.BDT1["R",], col="red"  , type="l",
+          main="R", xlab="a", ylab="", ylim=RRalim )
+  points( a.seq, PRA.BDT2["R",], col="red"  , type="l", lty=2 )
+  points( a.seq, PRA.BDT3["R",], col="red"  , type="l", lty=3 )
+  legend( "topright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+  
+  plot  ( a.seq, Ra.seq1, col="red"  , type="l",
+          main="Ra", xlab="a", ylab="", ylim=RRalim )
+  points( a.seq, Ra.seq2, col="red"  , type="l", lty=2 )
+  points( a.seq, Ra.seq3, col="red"  , type="l", lty=3 )
+  abline( v=amaxRa.1    , col="black", lty=1 )
+  abline( v=amaxRa.2    , col="black", lty=2 )
+  abline( v=amaxRa.3    , col="black", lty=3 )
+  text( amaxRa.1, min(Ra.seq1,na.rm=T), labels=paste("a_opt =",amaxRa.1 ), pos=4 )
+  text( amaxRa.2, min(Ra.seq2,na.rm=T), labels=paste("a_opt =",amaxRa.2 ), pos=4 )
+  text( amaxRa.3, min(Ra.seq3,na.rm=T), labels=paste("a_opt =",amaxRa.3 ), pos=4 )
+  legend( "bottomright", legend=c("High unc","", "Low unc"), lty=3:1, cex=0.75, col="red" )
+```
+
+
+
+\clearpage
+# PRA vs. BDT in the spatial example {#ChPRABDTspatial}
+
+```{r, echo=F}
+  gadm5  <- world(resolution=5, path="data/gadm")
+
+  r_alt  <- rast( "data/elevation/r_alt.tif" )
+  s_prec <- rast( "data/climate/s_prec.tif" )
+```
+
+```{r, echo=F}
+  YC <- function( x1, x2 ) {
+    alt <- x1  ; prec <- x2
+    YC  <- max(0, 10 * (1-exp(-prec/1000)) * (1-alt/1000) )
+    # YC  <- max(0, 10 * (1-exp(-prec/1000)) * (1-alt/2000) )
+    return( YC ) }
+```
+
+```{r, echo=T}
+  IRRIG <- 500
+
+  s_YC       <- rast( sapply(1:19, function(i){
+    xapp( r_alt, s_prec[[i]]      , fun=YC )}) )
+  s_YC.IRRIG <- rast( sapply(1:19, function(i){
+    xapp( r_alt, s_prec[[i]]+IRRIG, fun=YC )}) )
+```
+
+```{r, echo=T}
+  ky        <- 30 ; ka <- 0.1
+
+  s_U       <- s_YC       * ky
+  s_U.IRRIG <- s_YC.IRRIG * ky - IRRIG * ka
+```
+
+```{r U3years, fig.height=3.2, out.width="100%", fig.align="center", fig.cap="\\label{U3years}Utility in 2000, 2001 and 2018. Top row: no irrigation. Bottom row: irrigation at 500 $mm \\, y^{-1}$."}
+  par( mfrow=c(2,4), mar=c(1,0,1,0) )
+
+  years <- c(1:2,NA,19)
+
+  for( y in years ) { 
+    if(is.na(y)) plot(-1:1,rep(0,3),axes=0,xlim=c(-5,5),pch=19)
+    else { plot( s_U[[y]], range=c(0,230),
+                 main=paste0(y+1999,"\nIRRIG=0"), xaxt='n', yaxt='n' ) } }
+
+  for( y in years ) { 
+    if(is.na(y)) plot(-1:1,rep(0,3),axes=0,xlim=c(-5,5),pch=19)
+    else { plot( s_U.IRRIG[[y]], range=c(0,230),
+                 main=paste0(y+1999,"\nIRRIG=",IRRIG), xaxt='n', yaxt='n' ) } }
+```
+
+```{r}
+  r_U       <- mean( s_U )
+  r_U.IRRIG <- mean( s_U.IRRIG )
+```
+
+```{r EU, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="\\label{EU}Mean utility. Left: no irrigation. Middle: irrigation = 500 $mm \\, y^{-1}$. Right: utility-gain from irrigation."}
+  par( mfrow=c(1,3), mar=c(1,1,1,3) )
+
+  plot( r_U            , main="E[ u | IRRIG=0 ]",
+        xaxt='n', yaxt='n', range=c(  0,230) )
+  plot( r_U.IRRIG      , main=paste0("E[ u | IRRIG=",IRRIG," ]"),
+        xaxt='n', yaxt='n', range=c(  0,230) )
+  plot( r_U.IRRIG - r_U, main="d(u)",
+        xaxt='n', yaxt='n', range=c(-50, 10) )
+```
+ 
+```{r PRA.Ez_notH}
+  PRA.Ez_notH <- function( x, z, thr=1000, rel=F ) {
+    n       <- length(x) ; H  <- which(x < thr) ; notH   <- which(x >= thr)
+    n_H     <- length(H) ; pH <- n_H / n        ; n_notH <- length(notH)
+    Ez_H    <- mean( z[H]    ) ; s_Ez_H    <- sqrt( var(z[H   ]) / n_H    )
+    Ez_notH <- mean( z[notH] ) ; s_Ez_notH <- sqrt( var(z[notH]) / n_notH )
+    if(n_H==0){ Ez_H <- min(z) } ; if(n_notH==0){ Ez_notH <- max(z) }
+    V       <- Ez_notH - Ez_H  ; R         <- pH * V
+    s_pH    <- sqrt( pH*(1-pH) / n )
+    s_V     <- sqrt( s_Ez_H^2 + s_Ez_notH^2 )
+    s_R     <- sqrt( s_pH^2*s_V^2 + s_pH^2*V^2 + pH^2*s_V^2 )
+    if(rel){V <- V/Ez_notH ; R=R/Ez_notH; s_V=s_V/Ez_notH; s_R=s_R/Ez_notH}
+    return( c(Ez_notH=Ez_notH, pH=pH, V=V, R=R, s_pH=s_pH, s_V=s_V, s_R=s_R) )
+  }
+```
+
+```{r}
+  s_PRA       <- xapp( s_prec      , s_U      , fun=PRA.Ez_notH )
+  s_PRA.IRRIG <- xapp( s_prec+IRRIG, s_U.IRRIG, fun=PRA.Ez_notH )
+  r_Ez_notH   <- s_PRA$Ez_notH    ; r_Ez_notH.IRRIG <- s_PRA.IRRIG$Ez_notH
+  r_pH        <- s_PRA$pH         ; r_pH.IRRIG      <- s_PRA.IRRIG$pH
+  r_pH        <- mask(r_pH,r_alt) ; r_pH.IRRIG      <- mask(r_pH.IRRIG,r_alt)
+  r_V         <- s_PRA$V          ; r_V.IRRIG       <- s_PRA.IRRIG$V
+  r_R         <- s_PRA$R          ; r_R.IRRIG       <- s_PRA.IRRIG$R
+```
+
+```{r}
+  s_PRA2       <- xapp( s_prec      , s_U      , fun=PRA.Ez_notH, rel=T )
+  s_PRA.IRRIG2 <- xapp( s_prec+IRRIG, s_U.IRRIG, fun=PRA.Ez_notH, rel=T )
+  r_Ez_notH2   <- s_PRA2$Ez_notH    ; r_Ez_notH.IRRIG2 <- s_PRA.IRRIG2$Ez_notH
+  r_pH2        <- s_PRA2$pH         ; r_pH.IRRIG2      <- s_PRA.IRRIG2$pH
+  r_pH2        <- mask(r_pH2,r_alt) ; r_pH.IRRIG2      <- mask(r_pH.IRRIG2,r_alt)
+  r_V2         <- s_PRA2$V          ; r_V.IRRIG2       <- s_PRA.IRRIG2$V
+  r_R2         <- s_PRA2$R          ; r_R.IRRIG2       <- s_PRA.IRRIG2$R
+```
+
+```{r}
+  r_Rc           <- r_R           - r_Ez_notH
+  r_Rc.IRRIG     <- r_R.IRRIG     - r_Ez_notH.IRRIG
+```
+
+```{r PRASCO, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="\\label{PRASCO}PRA based on data for 2000-2018. Top row: no irrigation. Bottom row: irrigation = 500 $mm \\, y^{-1}$."}
+  par( mfrow=c(2,3), mar=c(1,1,1,3) )
+
+  plot( r_pH      , main="pH", xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 1) ) ; plot( gadm5, add=T)
+  plot( r_V       , main="V" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0,50) ) ; plot( gadm5, add=T)
+  plot( r_R       , main="R" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0,50) ) ; plot( gadm5, add=T)
+
+  plot( r_pH.IRRIG, main="pH.IRRIG", xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 1) ) ; plot( gadm5, add=T)
+  plot( r_V.IRRIG , main="V.IRRIG" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0,50) ) ; plot( gadm5, add=T)
+  plot( r_R.IRRIG , main="R.IRRIG" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0,50) ) ; plot( gadm5, add=T)
+```
+
+```{r PRASCO2, fig.height=3.5, out.width="100%", fig.align="center", fig.cap="\\label{PRASCO2}Relative PRA based on data for 2000-2018. Top row: no irrigation. Bottom row: irrigation = 500 $mm \\, y^{-1}$."}
+  par( mfrow=c(2,3), mar=c(1,1,1,3) )
+
+  plot( r_pH2      , main="pH", xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 1) ) ; plot( gadm5, add=T)
+  plot( r_V2       , main="V" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 0.17) ) ; plot( gadm5, add=T)
+  plot( r_R2       , main="R" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 0.17) ) ; plot( gadm5, add=T)
+
+  plot( r_pH.IRRIG2, main="pH.IRRIG", xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 1) ) ; plot( gadm5, add=T)
+  plot( r_V.IRRIG2 , main="V.IRRIG" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 0.17) ) ; plot( gadm5, add=T)
+  plot( r_R.IRRIG2 , main="R.IRRIG" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( 0, 0.17) ) ; plot( gadm5, add=T)
+```
+
+```{r Rc, fig.height=2.5, out.width="100%", fig.align="center", fig.cap="\\label{Rc}Corrected risk for utility. Left: no irrigation. Middle: irrigation as above. Right: decrease in corrected risk due to irrigation."}
+  par( mfrow=c(1,3), mar=c(1,1,1,3) )
+
+  plot( r_Rc             , main="Rc"      ,
+        xaxt='n', yaxt='n', range=c(-270, 0) ) ; plot( gadm5, add=T)
+  plot( r_Rc.IRRIG       , main="Rc.IRRIG",
+        xaxt='n', yaxt='n', range=c(-270, 0) ) ; plot( gadm5, add=T)
+  plot( r_Rc - r_Rc.IRRIG, main="-d(Rc)"  ,
+        xaxt='n', yaxt='n', range=c( -50,10) ) ; plot( gadm5, add=T)
+```
+
+
+
+\clearpage
+# Three-component PRA in the spatial example {#Ch3componentPRAspatial}
+
+```{r, echo=T}
+  exposure <- function( pH, ... ){
+    pH <- pH[!is.na(pH)]        ; n <- length(pH)
+    nE <- length( pH[pH>1/21] ) ; Q <- nE/n
+    return( Q ) }
+```
+
+```{r}
+  r_Q4     <- aggregate( r_pH    , fact=4, fun=exposure )
+```
+
+```{r}
+  s_prec4 <- aggregate( s_prec, fact=4, fun="c" )
+  s_U4    <- aggregate( s_U   , fact=4, fun="c" )
+    msk   <- ifel( r_Q4>0 & !is.na(s_prec4[[1]]), 1, NA )
+  s_PRA4  <- xapp( s_prec4, s_U4, fun=PRA.Ez_notH )
+  r_pH4   <- s_PRA4$pH ; r_pH4 <- mask( r_pH4, msk )
+  r_V4    <- s_PRA4$V  ; r_V4  <- mask( r_V4 , msk )
+  r_R4    <- s_PRA4$R  ; r_R4  <- mask( r_R4 , msk )
+```
+
+```{r}
+  par( mfrow=c(2,3), mar=c(1,1,1,3) )
+
+  plot( mean(s_prec4), main="mean(prec)", xaxt="n", yaxt="n") ; plot( gadm5, add=T)
+  plot( mean(s_U4   ), main="mean(U4)"  , xaxt="n", yaxt="n") ; plot( gadm5, add=T)
+        
+  plot( r_Q4 , main="Q" , xaxt="n", yaxt="n",
+        col=terrain.colors(100,rev=T) )                    ; plot( gadm5, add=T)
+  plot( r_pH4, main="pH", xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c(   0,  1) ) ; plot( gadm5, add=T)
+  plot( r_V4 , main="V" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( -40,40) )  ; plot( gadm5, add=T)
+  plot( r_R4 , main="R" , xaxt='n',yaxt='n',
+        col=terrain.colors(100,rev=T), range=c( -40,40) )  ; plot( gadm5, add=T)
+```
+
+
+
+\clearpage
+# Discussion {#ChDiscussion}
+
+## PRA and its application
+
+## Data and computational demand of PRA
+
+## BDT
+
+## Computational demand of BDT
+
+## PRA as a tool for simplifying and elucidating BDT
+
+## Parameter and model uncertainties
+
+## Modelling and decision-support for forest response to hazards
+
+## Spatial statistics
+
+
+
+\clearpage
+# References
