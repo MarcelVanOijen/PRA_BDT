@@ -38,7 +38,7 @@ bibliography:
   - Reinard Vonthein (Lubeck, mathematics of medicine and life sci.)
   - Tobias Mette (Freising, interested in GAM)
   - Gerhard Nehmiz (Bieberach, mathematics, biostatistics)
-  - Wolfgang Falk?
+  - Wolfgang Falk
 
 ## Prerequisites
 - R and R Studio installed
