@@ -29,7 +29,7 @@ bibliography:
 # Practicalities
 
 ## My lectures
-- Can I use my own MBP, i.e. can my laptop screen be projected?
+- Can I use my own MBP, i.e. can the laptop screen be projected?
 
 ## Where, When, Who
 - Course: Lubeck 2025-09-24 to 26.
