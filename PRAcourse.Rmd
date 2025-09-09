@@ -69,9 +69,9 @@ There will be four sessions of 1.5 hours each. We aim to include exercises in ea
 - Show examples from other authors who used (parts of) our PRA approach explicitly: @Ren_2023_Risk, @Nandintsetseg_2021_Risk, @He_2021_Drought, @Zhou_2018_Drought, @Kuhnert_2017_Impact, @Liu_2020_new, @Nandintsetseg_2024_Future.
 - Study examples (with pictures) of published risk analyses that do NOT use our PRA approach and ask: do these risk analyses distinguish and quantify $x, z, p[x], p[z], E[x], E[z], E[x|..], E[z|..], V, R$?
   - Fun different example: risk of large meteorite hitting the earth [https://www.nasa.gov/solar-system/asteroids/asteroid-fast-facts/; @Wheeler_2024_Risk]
-- In structuring the course, mainly follow BC2, Chapters 18 and 19 [@VanOijen_2024_Bayesian]. But also check BC1 Ch. 17 for some material on BDT (regarding VoI) left out of BC2.
+- In structuring the course, mainly follow BC2, Chapters 18 and 19 [@VanOijen_2024_Bayesian].
   - For additional material, see also our notes on @VanOijen_2022_Probabilistic in the next chapter of this document, and the other chapters on specific topics.
-- What **not** to include? (Maybe mention briefly but not treated in any depth)
+- What **not** to include? (Maybe mention briefly but do not treat in any depth.)
   - Gerhard suggests not to include copulas. But note that an additional use of copulas (besides our use in expressing p[x,z]) may be in spatial upscaling of local risks to larger areas [@Hochrainer-Stigler_2019_Large].
   - Extreme value theory.
 - Add a line-plot of $E[z|x]$ and for the multi-threshold PRA also a barplot with the set of x-interval conditional expectations for $z$, i.e $E[z|thr_{i-1} \leq x < thr_i]$ where $i=1,..,n$ and $thr_0=-\infty$.
@@ -83,7 +83,7 @@ There will be four sessions of 1.5 hours each. We aim to include exercises in ea
     - https://www.rdocumentation.org/packages/BayesXsrc/versions/3.0-6
   - ...
 - Can NIMBLE be linked to external PBMs?
-- Are Bayesian approaches to regression (incl. machine learning, CART) to be mentioned?
+- Should Bayesian approaches to regression (incl. machine learning, CART) be mentioned?
   - https://proceedings.mlr.press/r1/chipman97a.html
 - Can fault-tree-analysis (FTA, the nuclear industry's form of PRA) be carried out within our PRA framework? Maybe FTA can be seen as a decomposition of the hazard probability?
   - https://pipelinepodcastnetwork.com/probabilistic-risk-analysis/
@@ -2625,6 +2625,52 @@ The graphical model for BDT shown in Fig. \@ref(fig:DAGBDTnew) tells us that we 
 \end{equation}
 
 Generally we shall have to do our calculations numerically by generating a large sample of input vectors and calculating the associated utility for each of them.
+
+### GM exercise
+
+Start from a GM consisting of three binary variables: A -> B -> C. To keep notation brief, instead of writing "A=1" or "A=0", we shall write "A" resp. "a". So p[A] is the probability that the first node has the value 1, p[a] is its probability of being 0, etc.
+
+Say that the prior for the first node is p[A]=0.9. The conditional probability distribution for the next node is { p[B|A] = 0.9, p[B|a] = 0.6 } and for C it is { p[C|B] = 0.9, p[C|b] = 0.2 }. This defines the prior probability distribution for the whole network (chain).
+
+QUESTIONS:
+  
+1. What are the prior probabilities for B and C?
+
+We get information about one of the variables. What is then our posterior for the other two?
+2. Say we learn that the first node has the value 0. What are p[B|a] and p[C|a]?
+3. Say we learn instead that the second node has the value 0. What are p[A|b] and p[C|b]?
+4. Say we learn instead that the third node has the value 0. What are p[A|c] and p[B|c]?
+
+```{r}
+  pA <- 0.9 ; pB_A <- 0.9 ; pB_a <- 0.6 ; pC_B <- 0.9 ; pC_b <- 0.2
+
+  # Analytical solutions using Law of Total Probability (LTP) and Bayes' Theorem (BT):
+  pB   <- pA*pB_A + (1-pA)*pB_a     # = 0.9 *0.9  + 0.1 *0.6 = 0.87        # LTP
+  pC   <- pB*pC_B + (1-pB)*pC_b     # = 0.87*0.9  + 0.13*0.2 = 0.809       # LTP
+  # pB_a <- 0.6                                                            # Prior
+  pC_a <- pB_a*pC_B + (1-pB_a)*pC_b # = 0.6 *0.9  + 0.4 *0.2 = 0.62        # LTP
+  pA_b <- pA*(1-pB_A) / (1-pB)      # = 0.9 *0.1  / 0.13     = 9/13        # BT
+  # pC_b <- 0.2                                                            # Prior
+  pB_c <- pB*(1-pC_B) / (1-pC)      # = 0.87*0.1  / 0.191    = 87/191      # BT
+    pc_A <- pB_A*(1-pC_B) + (1-pB_A)*(1-pC_b) # = 0.9*0.1 + 0.1*0.8 = 0.17 # LTP
+  pA_c <- pA*pc_A     / (1-pC)      # = 0.9 *0.17 / 0.191    = 153/191     # BT
+  solA <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
+  
+  # Numerical solutions:
+  set.seed(1)
+  n    <- 1e6
+  A    <- rbinom( n, 1,   pA )
+  B    <- rbinom( n, 1, A*pB_A + (1-A)*pB_a )
+  C    <- rbinom( n, 1, B*pC_B + (1-B)*pC_b )
+  pB   <- sum(B==1) / n                ; pC   <- sum(C==1) / n
+  pB_a <- sum(A==0 & B==1) / sum(A==0) ; pC_a <- sum(A==0 & C==1) / sum(A==0)
+  pA_b <- sum(A==1 & B==0) / sum(B==0) ; pC_b <- sum(B==0 & C==1) / sum(B==0)
+  pB_c <- sum(B==1 & C==0) / sum(C==0) ; pA_c <- sum(A==1 & C==0) / sum(C==0)
+  solN <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
+  
+  # Comparison:
+  round( cbind( solA, solN ), 2 )
+```
 
 
 
