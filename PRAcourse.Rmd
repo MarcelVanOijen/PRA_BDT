@@ -54,15 +54,24 @@ bibliography:
 # Lectures
 
 ## Agenda
-There will be four sessions of 1.5 hours each. We aim to include exercises in each session.
+
+We aim to cover the following six topics:
 
 1. Introduction to PRA: Basic ideas & equations (**BC2: 18.1-18.6, PRA-BDT: 1-9**)
-2. Model-based PRA - 1 (incl. NIMBLE example Spain) (**PRA-BDT: 7**)
-3. (a) Model-based PRA - 2 (incl. NIMBLE example Spain) (**PRA-BDT: 7**)
-   (b) Expanding the theory (incl. Interacting hazards) (**BC2: 18.7, PRA-BDT: 10-11, 18**)
-4. (a) Introduction to BDT (**BC2: 19.1-19.3, BC1: 17.2, PRA-BDT: 12-15**)
-   (b) Links between PRA and BDT (**BC2: 19.4, PRA-BDT: 16-17**)
-   (c) General discussion (**BC2: 25.1, PRA-BDT: 19**)
+2. Model-based PRA (incl. NIMBLE example Spain) (**PRA-BDT: 7**)
+3. Expanding PRA-theory (incl. Interacting hazards) (**BC2: 18.7, PRA-BDT: 10-11, 18**)
+4. Introduction to BDT (**BC2: 19.1-19.3, BC1: 17.2, PRA-BDT: 12-15**)
+5. Links between PRA and BDT (**BC2: 19.4, PRA-BDT: 16-17**)
+6. General discussion (**BC2: 25.1, PRA-BDT: 19**)
+
+There will be four sessions of 1.5 hours each, so some sessions will cover multiple topics. The progress through the material will be decided together with the audience, but roughly we can expect the following scheduling of the topics:
+
+Session I  : 1
+Session II : 2
+Session III: 2,3
+Session IV : 4,5,6
+
+We aim to include exercises in each session to initiate discussion.
 
 ## Content ideas
 - Briefly summarise our previous work: @VanOijen_2024_Bayesian, @VanOijen_2022_Probabilistic, @VanOijen_2019_Probabilistic, @VanOijen_2019_Tools, @VanOijen_2014_Impact, @VanOijen_2013_novel.
@@ -129,6 +138,7 @@ There will be four sessions of 1.5 hours each. We aim to include exercises in ea
 ## Improvements
 - Mention a new location for downloadable R-code (i.e. my Zenodo/GitHub), and
 explain where errors were corrected and for which topics additional code is provided.
+- Include exercises?
 - Remove Eq. 2.2 (not used anywhere), and modify Eq. 2.1 (any term involving $x|z$ is confusing) such that it more clearly leads to the current Eq. 2.3.
 - Chapter ordering is confusing: better start from the structure of BC2 Ch. 18, or from the order used in this document.
 - Move paragraphs 2.3 and 4.7 to Ch. 5? And then simplify the title of that chapter to "Distribution-Based Single-Threshold PRA" or just "Distribution-Based PRA".
@@ -957,27 +967,27 @@ Let's now check whether these generated datasets have a constant value of V acro
 ```{r}
   n         <- 5e3
 
-  x_U       <- runif(n)     ; z_U <- 0.5 + x_U/2            + rnorm(n,0,0.05)
+  x_U       <- runif(n)     ; z_U <- 0.5 + x_U/2             + rnorm(n,0,0.05)
   thr.seq_U <- quantile( x_U, (1:19)/20 )
   PRA.seq_U <- t( sapply( thr.seq_U, function(t){PRA(x_U,z_U,t)} ) )
 
-  x_E       <- rexp(n)      ; z_E <- 1 - exp(-x_E)/2      + rnorm(n,0,0.05)
+  x_E       <- rexp(n)      ; z_E <- 1   - exp(-x_E)/2       + rnorm(n,0,0.05)
   thr.seq_E <- quantile( x_E, (1:19)/20 )
   PRA.seq_E <- t( sapply( thr.seq_E, function(t){PRA(x_E,z_E,t)} ) )
 
-  x_B       <- rbeta(n,5,1) ; z_B <- 0.5 + pbeta(x_B,5,1)/2 + rnorm(n,0,0.05)
+  x_B       <- rbeta(n,5,1) ; z_B <- 0.5 + pbeta(x_B,5,1)/2  + rnorm(n,0,0.05)
   thr.seq_B <- quantile( x_B, (1:19)/20 )
   PRA.seq_B <- t( sapply( thr.seq_B, function(t){PRA(x_B,z_B,t)} ) )
 
-  x_t       <- rt(n,1,30)   ; z_t <- 0.5 + pt(x_t,1,30)/2   + rnorm(n,0,0.05)
-  thr.seq_t <- quantile( x_t, (1:9)/10 )
+  x_t       <- rt(n,1,30)   ; z_t <- 0.5 + pt(x_t,1,30)/2    + rnorm(n,0,0.05)
+  thr.seq_t <- quantile( x_t, (1:19)/20 )
   PRA.seq_t <- t( sapply( thr.seq_t, function(t){PRA(x_t,z_t,t)} ) )
 
-  x_G       <- rnorm(n)     ; z_G <- 0.5 + pnorm(x_G)/2     + rnorm(n,0,0.05)
+  x_G       <- rnorm(n)     ; z_G <- 0.5 + pnorm(x_G)/2      + rnorm(n,0,0.05)
   thr.seq_G <- quantile( x_G, (1:19)/20 )
   PRA.seq_G <- t( sapply( thr.seq_G, function(t){PRA(x_G,z_G,t)} ) )
   
-  x_L       <- rnorm(n)     ; z_L <- 0.5 + 0.5/(1+exp(-2*x_L))+ rnorm(n,0,0.05)
+  x_L       <- rnorm(n)     ; z_L <- 0.5 + 0.5/(1+exp(-2*x_L)) + rnorm(n,0,0.05)
   thr.seq_L <- quantile( x_L, (1:19)/20 )
   PRA.seq_L <- t( sapply( thr.seq_L, function(t){PRA(x_L,z_L,t)} ) )
 ```
@@ -990,45 +1000,30 @@ Let's now check whether these generated datasets have a constant value of V acro
   points( thr.seq_U, PRA.seq_U[,"pH"], type="b", lwd=3, col="blue" )
   points( thr.seq_U, PRA.seq_U[,"V"] , type="b", lwd=3, col="green" )
   points( thr.seq_U, PRA.seq_U[,"R"] , type="b", lwd=3, col="red" )
-  legend ( "topleft", legend=c("z","pH","V","R"),
-           col=c("black","blue","green","red"),
-           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
 
   plot( x_E, z_E, xlab="", xlim=range(thr.seq_E), ylim=range(z_E,PRA.seq_E),
         pch=".", main="Exponential" )
   points( thr.seq_E, PRA.seq_E[,"pH"], type="b", lwd=3, col="blue" )
   points( thr.seq_E, PRA.seq_E[,"V"] , type="b", lwd=3, col="green" )
   points( thr.seq_E, PRA.seq_E[,"R"] , type="b", lwd=3, col="red" )
-  legend ( "topleft", legend=c("z","pH","V","R"),
-           col=c("black","blue","green","red"),
-           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
 
   plot( x_B, z_B,  xlab="", ylim=range(z_B,PRA.seq_B),
           pch=".", main="Beta" )
   points( thr.seq_B, PRA.seq_B[,"pH"], type="b", lwd=3, col="blue" )
   points( thr.seq_B, PRA.seq_B[,"V"] , type="b", lwd=3, col="green" )
   points( thr.seq_B, PRA.seq_B[,"R"] , type="b", lwd=3, col="red" )
-  legend ( "topleft", legend=c("z","pH","V","R"),
-           col=c("black","blue","green","red"),
-           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
 
   plot( x_t, z_t,  xlab="x or thr", xlim=range(thr.seq_t), ylim=range(z_t,PRA.seq_t),
         pch=".", main="t" )
   points( thr.seq_t, PRA.seq_t[,"pH"], type="b", lwd=3, col="blue" )
   points( thr.seq_t, PRA.seq_t[,"V"] , type="b", lwd=3, col="green" )
   points( thr.seq_t, PRA.seq_t[,"R"] , type="b", lwd=3, col="red" )
-  legend ( "topleft", legend=c("z","pH","V","R"),
-           col=c("black","blue","green","red"),
-           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
 
   plot( x_G, z_G,  xlab="x or thr", ylim=range(z_G,PRA.seq_G),
         pch=".", main="Gaussian" )
   points( thr.seq_G, PRA.seq_G[,"pH"], type="b", lwd=3, col="blue" )
   points( thr.seq_G, PRA.seq_G[,"V"] , type="b", lwd=3, col="green" )
   points( thr.seq_G, PRA.seq_G[,"R"] , type="b", lwd=3, col="red" )
-  legend ( "topleft", legend=c("z","pH","V","R"),
-           col=c("black","blue","green","red"),
-           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
 
   plot( x_L, z_L,  xlab="x or thr", ylim=range(z_L,PRA.seq_L),
         pch=".", main="Gaussian-Logistic" )
@@ -1042,7 +1037,118 @@ Let's now check whether these generated datasets have a constant value of V acro
 
 The plots show that $V$ is indeed constant in the first five plots, where $E[z|x]$ was a linear transformation of $F_x[x]$, and nearly constant in the last one where a close relative of $F_x[x]$ was used.
 
+Note that multi-threshold PRA would still give for each interval a different value of $V$, as shown in the next figure.
 
+```{r}
+  PRAm.seq_U <- PRAm( x_U, z_U, thr.seq_U )$seq
+  PRAm.seq_E <- PRAm( x_E, z_E, thr.seq_E )$seq
+  PRAm.seq_B <- PRAm( x_B, z_B, thr.seq_B )$seq
+  PRAm.seq_t <- PRAm( x_t, z_t, thr.seq_t )$seq
+  PRAm.seq_G <- PRAm( x_G, z_G, thr.seq_G )$seq
+  PRAm.seq_L <- PRAm( x_L, z_L, thr.seq_L )$seq
+```
+
+```{r, echo=F, fig.cap="Six datasets {x,z} subjected to multi-threshold sampling-based PRA using 19 equal-probability x-intervals. The blue, green and red lines show how pH, V and R vary with x."}
+  par(mfrow=c(2,3), mar=c(4,2,2,1))
+
+  plot( x_U, z_U, xlab="", ylim=c(0,1.2),
+        pch=".", main="Uniform" )
+  points( thr.seq_U, 10*PRAm.seq_U[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_U,    PRAm.seq_U[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_U, 10*PRAm.seq_U[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_E, z_E, xlab="", xlim=range(thr.seq_E), ylim=c(0,1.2),
+        pch=".", main="Exponential" )
+  points( thr.seq_E, 10*PRAm.seq_E[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_E,    PRAm.seq_E[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_E, 10*PRAm.seq_E[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_B, z_B,  xlab="", ylim=c(0,1.2), pch=".", main="Beta" )
+  points( thr.seq_B, 10*PRAm.seq_B[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_B,    PRAm.seq_B[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_B, 10*PRAm.seq_B[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_t, z_t,  xlab="x", xlim=range(thr.seq_t), ylim=c(0,1.2),
+        pch=".", main="t" )
+  points( thr.seq_t, 10*PRAm.seq_t[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_t,    PRAm.seq_t[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_t, 10*PRAm.seq_t[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_G, z_G,  xlab="x", ylim=c(0,1.2), pch=".", main="Gaussian" )
+  points( thr.seq_G, 10*PRAm.seq_G[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_G,    PRAm.seq_G[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_G, 10*PRAm.seq_G[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_L, z_L,  xlab="x", ylim=c(0,1.2), pch=".", main="Gaussian-Logistic" )
+  points( thr.seq_L, 10*PRAm.seq_L[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seq_L,    PRAm.seq_L[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seq_L, 10*PRAm.seq_L[,"R"] , type="b", lwd=3, col="red" )
+  legend ( "topleft", legend=c("z","pH*10","V","R*10"),
+           col=c("black","blue","green","red"),
+           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
+```
+
+The six multi-threshold PRAs have a constant $p[H]$ rather than a constant $V$ because we subdivided the hazardous region into nineteen equal-probability intervals (each 5%). Both $V$ and $R$ are continuously decreasing functions of $x$ now, but the rate of decrease varies strongly between the six datasets. The one generated by the t-distribution has the strongest concentration of risk at the lower extreme of $x$.
+
+The fact that $p[H]$ becomes constant (and $R$ proportional to $V$), if we choose equal-probability x-intervals, makes the multi-threshold PRA fairly uninteresting. It is more informative to distribute the x-interval boundaries uniformly, as in the following figure.
+
+```{r}
+  thr.seqU_U  <- seq( quantile(x_U,1/10), quantile(x_U,9/10), length.out=9 )
+  thr.seqU_E  <- seq( quantile(x_E,1/10), quantile(x_E,9/10), length.out=9 )
+  thr.seqU_B  <- seq( quantile(x_B,1/10), quantile(x_B,9/10), length.out=9 )
+  thr.seqU_t  <- seq( quantile(x_t,1/10), quantile(x_t,9/10), length.out=9 )
+  thr.seqU_G  <- seq( quantile(x_G,1/10), quantile(x_G,9/10), length.out=9 )
+  thr.seqU_L  <- seq( quantile(x_L,1/10), quantile(x_L,9/10), length.out=9 )
+  
+  PRAm.seqU_U <- PRAm( x_U, z_U, thr.seqU_U )$seq
+  PRAm.seqU_E <- PRAm( x_E, z_E, thr.seqU_E )$seq
+  PRAm.seqU_B <- PRAm( x_B, z_B, thr.seqU_B )$seq
+  PRAm.seqU_t <- PRAm( x_t, z_t, thr.seqU_t )$seq
+  PRAm.seqU_G <- PRAm( x_G, z_G, thr.seqU_G )$seq
+  PRAm.seqU_L <- PRAm( x_L, z_L, thr.seqU_L )$seq
+```
+
+```{r, echo=F, fig.cap="Six datasets {x,z} subjected to multi-threshold sampling-based PRA using 9 same-width x-intervals. The blue, green and red lines show how pH, V and R vary with x."}
+  par(mfrow=c(2,3), mar=c(4,2,2,1))
+
+  plot( x_U, z_U, xlab="", ylim=c(0,1.2),
+        pch=".", main="Uniform" )
+  points( thr.seqU_U, 2*PRAm.seqU_U[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_U, 2*PRAm.seqU_U[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_U, 2*PRAm.seqU_U[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_E, z_E, xlab="", xlim=range(thr.seq_E), ylim=c(0,1.2),
+        pch=".", main="Exponential" )
+  points( thr.seqU_E, 2*PRAm.seqU_E[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_E, 2*PRAm.seqU_E[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_E, 2*PRAm.seqU_E[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_B, z_B,  xlab="", ylim=c(0,1.2), pch=".", main="Beta" )
+  points( thr.seqU_B, 2*PRAm.seqU_B[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_B, 2*PRAm.seqU_B[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_B, 2*PRAm.seqU_B[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_t, z_t,  xlab="x", xlim=range(thr.seq_t), ylim=c(0,1.2),
+        pch=".", main="t" )
+  points( thr.seqU_t, 2*PRAm.seqU_t[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_t, 2*PRAm.seqU_t[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_t, 2*PRAm.seqU_t[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_G, z_G,  xlab="x", ylim=c(0,1.2), pch=".", main="Gaussian" )
+  points( thr.seqU_G, 2*PRAm.seqU_G[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_G, 2*PRAm.seqU_G[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_G, 2*PRAm.seqU_G[,"R"] , type="b", lwd=3, col="red" )
+
+  plot( x_L, z_L,  xlab="x", ylim=c(0,1.2), pch=".", main="Gaussian-Logistic" )
+  points( thr.seqU_L, 2*PRAm.seqU_L[,"pH"], type="b", lwd=3, col="blue" )
+  points( thr.seqU_L, 2*PRAm.seqU_L[,"V"] , type="b", lwd=3, col="green" )
+  points( thr.seqU_L, 2*PRAm.seqU_L[,"R"] , type="b", lwd=3, col="red" )
+  legend ( "topleft", legend=c("z","pH*10","V","R*10"),
+           col=c("black","blue","green","red"),
+           pch=c(1,NA,NA,NA), lty=c(NA,1,1,1), cex=0.75 )
+```
+
+The last figure now shows more interesting x-interval-dependent $R$, and a more helpful decomposition into $p[H]$ and $V$. We see for example that the major risk in the t-distribution dataset is associated with the second interval, where $p[H]$ is highest and $V$ second-highest.
 
 \clearpage
 # Model-Based PRA
@@ -2592,6 +2698,7 @@ $\texttt{No thinning}$ & $100 \%$ & $40 \%$ & $\overline{u}(a_1)$ \\
 $50 \% \texttt{ thinning}$ & $50 \%$ & $40 \%$ & $\overline{u}(a_2)$
 \end{tabular}
 
+
 EXERCISE
 
 Assume that our only uncertainty is about the beetles for which $p[x=x_2=Beetles]$ equals 0.7.
@@ -2637,6 +2744,7 @@ QUESTIONS:
 1. What are the prior probabilities for B and C?
 
 We get information about one of the variables. What is then our posterior for the other two?
+
 2. Say we learn that the first node has the value 0. What are p[B|a] and p[C|a]?
 3. Say we learn instead that the second node has the value 0. What are p[A|b] and p[C|b]?
 4. Say we learn instead that the third node has the value 0. What are p[A|c] and p[B|c]?
@@ -2659,7 +2767,7 @@ We get information about one of the variables. What is then our posterior for th
   # Numerical solutions:
   set.seed(1)
   n    <- 1e6
-  A    <- rbinom( n, 1,   pA )
+  A    <- rbinom( n, 1, pA )
   B    <- rbinom( n, 1, A*pB_A + (1-A)*pB_a )
   C    <- rbinom( n, 1, B*pC_B + (1-B)*pC_b )
   pB   <- sum(B==1) / n                ; pC   <- sum(C==1) / n
