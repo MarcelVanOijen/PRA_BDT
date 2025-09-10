@@ -295,10 +295,8 @@ We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit
   n    <- dim(y_r_m)[1] ; k <- 3 
   x_r3 <- meanlast(y_r_m[,"rain.mm"],k)[k:n]
   
-  z_Fs <- y_r_m[k:n,"mort.%_Fs"]
-  z_Q  <- y_r_m[k:n,"mort.%_Q" ]
-  z_Pa <- y_r_m[k:n,"mort.%_Pa"]
-  z_Ps <- y_r_m[k:n,"mort.%_Ps"]
+  z_Fs <- y_r_m[k:n,"mort.%_Fs"] ; z_Q  <- y_r_m[k:n,"mort.%_Q" ]
+  z_Pa <- y_r_m[k:n,"mort.%_Pa"] ; z_Ps <- y_r_m[k:n,"mort.%_Ps"]
   
   par ( mfrow=c(2,2), mar=c(4,4,1,2) )
   plot( x_r3, z_Fs, main="Fs", xlab=""         , ylab="mortality (%)" )
@@ -581,7 +579,7 @@ The above approximation formulas for conditional means and variances of the biva
 
 So whenever we are certain that the joint distribution $p[x,z]$ is well represented by $N[\mu,\Sigma]$, the function call $\texttt{PRA\_Gauss(mu,Sigma,thr)}$ would give us our PRA. But generally we only have a sample from $\{x,z\}$ and even if we are convinced that a bivariate Gaussian is suitable, we then still have uncertainty about the hyperparameters of the distribution. So we need a probability distribution for the hyperparameters. For this, we use a conjugate Bayesian approach where the posterior distribution can be calculated analytically.
 
-Say that our data are $y=\{x_i,z_i\}, i=1..n$ with $m = (\overline{x},\overline{z})$ and $S = cov(x,z)$. If we assign a noninformative Jeffreys prior $p[\mu,\Sigma] \propto |\Sigma|^{-3/2}]$, then the posterior is an inverse Wishart distribution for $\Sigma$ times a conditionally normal distribution for $\mu$ (e.g. @Gelman_2013_Bayesian). Concretely, $p[\Sigma|y] = IWi_{n-1}(S^{-1})$ and $p[\mu|\Sigma,y] = N[m,\Sigma/n]$.
+Say that our data are $y=\{x_i,z_i\}, i=1..n$ with $m = (\overline{x},\overline{z})$ and $S = cov(x,z)$. If we assign an uninformative Jeffreys prior $p[\mu,\Sigma] \propto |\Sigma|^{-3/2}$, then the posterior is an inverse Wishart distribution for $\Sigma$ times a conditionally normal distribution for $\mu$ (e.g. @Gelman_2013_Bayesian). Concretely, $p[\Sigma|y] = IWi_{n-1}(S^{-1})$ and $p[\mu|\Sigma,y] = N[m,\Sigma/n]$.
 
 After such Bayesian updating, we can generate a large number of realisations $\mu,\Sigma$ from the posterior and carry out a distribution-based PRA for each, thus permitting UQ. Here is R-code:
 
