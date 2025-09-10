@@ -280,8 +280,7 @@ We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit
   d.data        <- "data_Germany/"
 
   file.data     <- paste0( d.data, "2-bis-7_abb-tab_nsh_2024-04-08.xlsx" )
-  sheet.data    <- "5_Daten"
-  r.data        <- "B120:C153"
+  sheet.data    <- "5_Daten" ; r.data <- "B120:C153"
   y_r           <- read_excel( file.data, sheet=sheet.data, range=r.data, col_names=F )
   y_r           <- round( as.matrix(y_r) )
   colnames(y_r) <- c( "year", "rain.mm" )
@@ -293,17 +292,18 @@ We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit
 
   # Annual mortality vs. summer rain of last three years
   meanlast <- function(v,k){as.vector(filter(v,f=rep(1/k,k),s=1))}
-  n   <- dim(y_r_m)[1] ; k <- 3 
+  n    <- dim(y_r_m)[1] ; k <- 3 
   x_r3 <- meanlast(y_r_m[,"rain.mm"],k)[k:n]
   
-  par ( mfrow=c(2,2), mar=c(4,4,1,2) )
   z_Fs <- y_r_m[k:n,"mort.%_Fs"]
-  plot( x_r3, z_Fs, main="Fs", xlab=""         , ylab="mortality (%)" )
-  z_Q <- y_r_m[k:n,"mort.%_Q"]
-  plot( x_r3, z_Q , main="Q" , xlab=""         , ylab=""              )
+  z_Q  <- y_r_m[k:n,"mort.%_Q" ]
   z_Pa <- y_r_m[k:n,"mort.%_Pa"]
-  plot( x_r3, z_Pa, main="Pa", xlab="rain (mm)", ylab="mortality (%)" )
   z_Ps <- y_r_m[k:n,"mort.%_Ps"]
+  
+  par ( mfrow=c(2,2), mar=c(4,4,1,2) )
+  plot( x_r3, z_Fs, main="Fs", xlab=""         , ylab="mortality (%)" )
+  plot( x_r3, z_Q , main="Q" , xlab=""         , ylab=""              )
+  plot( x_r3, z_Pa, main="Pa", xlab="rain (mm)", ylab="mortality (%)" )
   plot( x_r3, z_Ps, main="Ps", xlab="rain (mm)", ylab=""              )
 ```
 
@@ -353,6 +353,14 @@ Our function $\texttt{PRA}$ for single-threshold sampling-based PRA was already 
 ```
 
 Sampling-based PRA requires a sufficiently large dataset to allow calculation of variances and thus UQ: $n_H \ge 2$ and $(n-n_H) >= 2$.
+
+```{r}
+  x <- c( 200, 600 )           ; z <- c(  70,  90 )
+  PRA( x, z, 500 )
+
+  x <- c( 200, 400, 600, 800 ) ; z <- c(  70,  80,  90, 100 )
+  PRA( x, z, 500 )
+```
 
 ## Multi-threshold PRA
 We now consider PRA where the number of thresholds $n_{thr}$ exceeds 1. The space of $x$ then consists of $k = n_{thr}+1$ disjoint intervals of which one is the non-hazardous region.
