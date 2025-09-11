@@ -27,17 +27,6 @@ bibliography: PRA_BDT.bib
   library(VineCopula)
 ```
 
-```{r, include=FALSE}
-  m2l <- function(matr) {
-    # Code from Maxim.K et al. https://stackoverflow.com/questions/20759444/
-    printmrow <- function(x) {
-      ret <- paste(paste(x,collapse = " & "),"\\\\")
-      sprintf(ret) }
-    out  <- apply(matr,1,printmrow)
-    out2 <- paste("\\begin{bmatrix}",paste(out,collapse=' '),"\\end{bmatrix}")
-    return(out2) }
-```
-
 
 
 \clearpage

@@ -24,6 +24,18 @@ bibliography:
   library(truncnorm)
 ```
 
+```{r, echo=FALSE}
+  m2l <- function(matr) {
+    # Code from Maxim.K et al. https://stackoverflow.com/questions/20759444/
+    printmrow <- function(x) {
+      ret <- paste(paste(x,collapse = " & "),"\\\\")
+      sprintf(ret) }
+    out  <- apply(matr,1,printmrow)
+    out2 <- paste("\\begin{bmatrix}",paste(out,collapse=' '),"\\end{bmatrix}")
+    return(out2) }
+```
+
+
 
 \clearpage
 # Practicalities
@@ -127,8 +139,9 @@ We aim to include exercises in each session to initiate discussion.
 ## Errata
 - p.14 refers to 'Monte Carlo' (MC) four times but the approach here is based on numerical solutions to the conditional expectation values without any MC sampling.
 - p.21, 4.3 "any deviation ... $E[z \geq thr]$" should be ... $E[z|x \geq thr]$. (But note that the whole equation for $\sigma_R$ may be simplified, see next section on book improvements.)
+- Eqs 2.7, 2.8 and 4.5 are not approximations but exact. Make appropriate changes in text and equations. For example, change the first sentence of 2.3 from "Even though in the case of the bivariate Gaussian no closed-form solution exists for the distribution of z given that x is below or above a threshold, there is an approximation formula for ..." to "If $p[x,z]$ is a bivariate Gaussian, then $p[z|x]$ is a Gaussian too, but the two distributions that we need for PRA, i.e. $p[z|x<thr]$ and $p[z| \ge thr]$, are not Gaussian. However there are closed-form solutions for the means and variances of these two distributions (e.g. @Mee_1983_Simple), which we show here in their most general form."
 - There are errors in text, equations and underlying code of section 4.7 (pp. 26-27).
-  - **Text**: "The same authors also provided a formula to approximate the conditional variance for the same distribution: $Var[z|x < thr] = 1 + \rho \, thr \, E[z] - E[z]^2$" should have conditional expectations on the right: "$... = 1 + \rho \, thr \, E[z|x < thr] - E[z|x<thr]^2$".
+  - **Text**: "...approximately estimating ... The same authors also provided a formula to approximate the conditional variance for the same distribution: $Var[z|x < thr] = 1 + \rho \, thr \, E[z] - E[z]^2$" should not refer to approximation (the formulas are exact) and have conditional expectations on the right: "$... = 1 + \rho \, thr \, E[z|x < thr] - E[z|x<thr]^2$".
   - **Equation 4.5**: The equations as written give a value equal to 1 for the conditional variances if $\rho = 0$ and $thr \to \infty$ resp. $thr \to -\infty$. The proper limits are $\sigma^2_z$ so that is what both appearances of "$1$" should be replaced by. 
   - **Code**: In the underlying code (not shown in the book) for functions $\texttt{Varz\_xbelowAppr}$ and $\texttt{Varz\_xaboveAppr}$, the calculation of $\texttt{Varzxbelow}$ resp. $\texttt{Varzxabove}$ should operate on $\texttt{mx.}$ and $\texttt{mz.}$ instead of $\texttt{mx}$ and $\texttt{mz}$. And for consistence we may also prefer to use $\texttt{thr.}$ and $\texttt{r.}$ rather than $\texttt{thr}$ and $\texttt{r}$ as function arguments. The old argument-names will generally not cause problems but should be changed anyway. When also correcting the above-mentioned equation-errors, the corrected code becomes:
     - $\texttt{Varzxbelow}$ <- Vz. + r. * (thr.-mx.) * (Ezxbelow-mz.) - (Ezxbelow-mz.)^2
@@ -529,7 +542,7 @@ In fact, also for our bivariate distribution p[x,z] the sample mean $m=(m_x,m_z)
 When we have a joint probability distribution for {x,z}, we can remove *sampling* uncertainty by taking a very large sample from the distribution. That will reduce uncertainty about p[H], V and R to nearly zero. But uncertainty about loss will of course remain, even for any specific value of x. So large uncertainty about x and z does not preclude low uncertainty about hazard probability, system vulnerability and risk. You know exactly what your chances are with roulette, and what your expected gains are, but that does not preclude large uncertainty about gains in a few turnings of the wheel. Is this a motivation to study p[loss]?
 
 ## Conditional means and variances
-This section deals only with the bivariate Gaussian p[x,z] for which formulas approximating the conditional means and variances were given by @VanOijen_2022_Probabilistic Eqs 2.7 and 4.5. Here is a new implementation of those formulas (including an error correction for the conditional variance: "1 + .." becoming "Vz + .."):
+This section deals only with the bivariate Gaussian p[x,z] for which formulas for the conditional means and variances were given by @VanOijen_2022_Probabilistic Eqs 2.7 and 4.5. Here is a new implementation of those formulas (including an error correction for the conditional variance: "1 + .." becoming "Vz + .."):
 
 ```{r}
   EzVz_Gauss <- function( m.=m, S.=S, thr.=thr ) {
@@ -545,7 +558,7 @@ This section deals only with the bivariate Gaussian p[x,z] for which formulas ap
     return( result ) }
 ```
 
-We can do a quick sense check of the above approximations by setting x=z and checking that the formulas then reduce to the mean and variance for the monovariate truncated normal distribution:
+We can do a quick sense check of these formulas by setting x=z and checking that the formulas then reduce to the mean and variance for the monovariate truncated normal distribution:
 
 - Eq. 2.7 =>  E[z|z<thr]   = m - V * pthr / Fthr
 - Eq. 4.5 =>  Var[z|z<thr] = V - (thr-m) * V * pthr/Fthr - V^2 * (pthr/Fthr)^2
@@ -563,10 +576,10 @@ These are indeed the known equations for the truncated normal. And for a numeric
   c( mean( z[x< thr] ), mean( z[x>=thr] ), var( z[x< thr] ), var( z[x>=thr] ) )
 ```
 
-The numerical results confirm that our approximation formulas work well.
+The numerical results confirm that the formulas work well.
 
 ## PRA
-The above approximation formulas for conditional means and variances of the bivariate Gaussian lead to very simple equations for PRA (@VanOijen_2022_Probabilistic p.14, Eqs 2.8), which we implement in the following R-function: 
+The above formulas for conditional means and variances of the bivariate Gaussian lead to very simple equations for PRA (@VanOijen_2022_Probabilistic p.14, Eqs 2.8), which we implement in the following R-function: 
 
 ```{r}
   PRA0_Gauss <- function( m.=m, S.=S, thr.=thr ) {
@@ -581,7 +594,17 @@ So whenever we are certain that the joint distribution $p[x,z]$ is well represen
 
 Say that our data are $y=\{x_i,z_i\}, i=1..n$ with $m = (\overline{x},\overline{z})$ and $S = cov(x,z)$. If we assign an uninformative Jeffreys prior $p[\mu,\Sigma] \propto |\Sigma|^{-3/2}$, then the posterior is an inverse Wishart distribution for $\Sigma$ times a conditionally normal distribution for $\mu$ (e.g. @Gelman_2013_Bayesian). Concretely, $p[\Sigma|y] = IWi_{n-1}(S^{-1})$ and $p[\mu|\Sigma,y] = N[m,\Sigma/n]$.
 
-After such Bayesian updating, we can generate a large number of realisations $\mu,\Sigma$ from the posterior and carry out a distribution-based PRA for each, thus permitting UQ. Here is R-code:
+Here are three covariance matrices generated by the posterior inverse Wishart distribution found by conditioning on the first linear dataset:
+
+```{r}
+  xz <- l_xz.L[[1]] ; n <- dim(xz)[1] ; S <- cov(xz)
+```
+
+$`r m2l( round( riwish(n-1,S*(n-1)), 2 ) )`$
+$`r m2l( round( riwish(n-1,S*(n-1)), 2 ) )`$
+$`r m2l( round( riwish(n-1,S*(n-1)), 2 ) )`$
+
+We conclude that after the Bayesian updating, we can generate a large number of realisations $\mu,\Sigma$ from the posterior and carry out a distribution-based PRA for each, thus permitting UQ. Here is R-code:
 
 ```{r}
   PRA_Gauss <- function( m.=m, S.=S, n.=n, thr.=thr ) {
