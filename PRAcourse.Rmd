@@ -2788,21 +2788,21 @@ We get information about one of the variables. What is then our posterior for th
   pC_a <- pB_a*pC_B + (1-pB_a)*pC_b # = 0.6 *0.9  + 0.4 *0.2 = 0.62        # LTP
   pA_b <- pA*(1-pB_A) / (1-pB)      # = 0.9 *0.1  / 0.13     = 9/13        # BT
   # pC_b <- 0.2                                                            # Prior
-  pB_c <- pB*(1-pC_B) / (1-pC)      # = 0.87*0.1  / 0.191    = 87/191      # BT
     pc_A <- pB_A*(1-pC_B) + (1-pB_A)*(1-pC_b) # = 0.9*0.1 + 0.1*0.8 = 0.17 # LTP
   pA_c <- pA*pc_A     / (1-pC)      # = 0.9 *0.17 / 0.191    = 153/191     # BT
+  pB_c <- pB*(1-pC_B) / (1-pC)      # = 0.87*0.1  / 0.191    = 87/191      # BT
   solA <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
   
   # Numerical solutions:
-  set.seed(1)
+  pA   <- 0.9 ; pB_A <- 0.9 ; pB_a <- 0.6 ; pC_B <- 0.9 ; pC_b <- 0.2
   n    <- 1e6
-  A    <- rbinom( n, 1, pA )
-  B    <- rbinom( n, 1, A*pB_A + (1-A)*pB_a )
-  C    <- rbinom( n, 1, B*pC_B + (1-B)*pC_b )
-  pB   <- sum(B==1) / n                ; pC   <- sum(C==1) / n
-  pB_a <- sum(A==0 & B==1) / sum(A==0) ; pC_a <- sum(A==0 & C==1) / sum(A==0)
-  pA_b <- sum(A==1 & B==0) / sum(B==0) ; pC_b <- sum(B==0 & C==1) / sum(B==0)
-  pB_c <- sum(B==1 & C==0) / sum(C==0) ; pA_c <- sum(A==1 & C==0) / sum(C==0)
+  x    <- rbinom( n, 1, pA )
+  y    <- rbinom( n, 1, x*pB_A + (1-x)*pB_a )
+  z    <- rbinom( n, 1, y*pC_B + (1-y)*pC_b )
+  pB   <- sum(y==1) / n                ; pC   <- sum(z==1) / n
+  pB_a <- sum(x==0 & y==1) / sum(x==0) ; pC_a <- sum(x==0 & z==1) / sum(x==0)
+  pA_b <- sum(x==1 & y==0) / sum(y==0) ; pC_b <- sum(y==0 & z==1) / sum(y==0)
+  pA_c <- sum(z==1 & z==0) / sum(z==0) ; pB_c <- sum(y==1 & z==0) / sum(z==0) 
   solN <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
   
   # Comparison:
