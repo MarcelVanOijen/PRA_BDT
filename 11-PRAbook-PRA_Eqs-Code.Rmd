@@ -493,16 +493,16 @@ where $z[thr] = E[z|x=thr]$.
           lty=1, cex=0.75 )
 ```
 
-## Approximation formulas for the conditional bivariate Gaussian expectations
+## Formulas for the conditional bivariate Gaussian expectations
 
 \begin{equation}
 \begin{aligned}
-  &\underline{ \textrm{APPRXOXIMATION FOR BIVARIATE GAUSSIAN p[x,z]:} } \\
-  &E[z|x < thr] \approx E[z] - \, \rho \, \sigma_x \, \sigma_z \,
+  &\underline{ \textrm{EXPECTATIONS FOR BIVARIATE GAUSSIAN p[x,z]:} } \\
+  &E[z|x < thr] = E[z] - \, \rho \, \sigma_x \, \sigma_z \,
                         \frac{p_x[thr]}{F_x[thr]}, \\
-  &E[z|x \geq thr] \approx  E[z] + \, \rho \, \sigma_x \, \sigma_z \,
+  &E[z|x \geq thr] =  E[z] + \, \rho \, \sigma_x \, \sigma_z \,
                         \frac{p_x[thr]}{1-F_x[thr]}.
-  (\#eq:EzcondApproxGaussian)
+  (\#eq:EzcondGaussian)
 \end{aligned}
 \end{equation}
 
@@ -525,7 +525,7 @@ where $z[thr] = E[z|x=thr]$.
   S  <- var(xz)     ; r <- S[1,2] / sqrt(Vx * Vz) ; Vx <- S[1,1] ; Vz <- S[2,2]
 ```
 
-```{r EzcondApproxGaussian, echo=F, out.width="50%", fig.height=6, fig.align="center", fig.cap="Conditional expectations for $z$ as a function of threshold-value in the case of bivariate Gaussian $p[x,z]$. Solid lines: Numerical integration. Dashed lines: approximation formulas."}
+```{r EzcondGaussian, echo=F, out.width="50%", fig.height=6, fig.align="center", fig.cap="Conditional expectations for $z$ as a function of threshold-value in the case of bivariate Gaussian $p[x,z]$. Solid lines: Numerical integration. Dashed lines: Formulas."}
   thr.seq       <- seq( mx-2, mx+2, length.out=101 )
 
   Ez_xlo_NI.seq <- sapply( thr.seq, Ez_xlo_NI,
@@ -545,21 +545,21 @@ where $z[thr] = E[z|x=thr]$.
   points( thr.seq, Ez_xhi.seq   , col="black", type="l", lwd=2, lty=2 )
   
   legend( "bottomright",
-          legend=c( "E[z|x>=thr] (num. int.)", "E[z|x>=thr] (approx.)",
-                    "E[z|x<thr] (num. int.)" , "E[z|x<thr] (approx.)" ),
+          legend=c( "E[z|x>=thr] (num. int.)", "E[z|x>=thr] (formula)",
+                    "E[z|x<thr] (num. int.)" , "E[z|x<thr] (formula)" ),
           col=c("black","black","red","red"),
           lty=c(1,2,1,2), lwd=2, cex=1.4 )
 ```
 
 \begin{equation}
 \begin{aligned}
-  &\underline{ \textrm{APPROXIMATE PRA FOR BIVARIATE GAUSSIAN p[x,z]:} } \\
+  &\underline{ \textrm{PRA FOR BIVARIATE GAUSSIAN p[x,z]:} } \\
   &p[H] = F_x[thr], \\
-  &V    \approx \frac{\rho \, \sigma_x \, \sigma_z \, p_x[thr]}
+  &V    = \frac{\rho \, \sigma_x \, \sigma_z \, p_x[thr]}
                      {F_x[thr] \, (1-F_x[thr])}, \\
-  &R    \approx \frac{\rho \, \sigma_x \, \sigma_z \, p_x[thr]}
+  &R    = \frac{\rho \, \sigma_x \, \sigma_z \, p_x[thr]}
                      {1-F_x[thr]}.
-  (\#eq:PRAapproxGaussian)
+  (\#eq:PRAGaussian)
 \end{aligned}
 \end{equation}
 
@@ -897,18 +897,18 @@ where $\sigma_{\hat{E}[z|x \geq thr]}$ and $\sigma_{\hat{E}[z|x < thr]}$ are as 
     abline( v=slist_R , col="red", lwd=1 )
 ```
 
-## Approximation formulas for the conditional bivariate Gaussian variances 
+## Formulas for the conditional bivariate Gaussian variances 
 
 \begin{equation}
 \begin{aligned}
-  &\underline{ \textrm{APPRXOXIMATION FOR BIVARIATE GAUSSIAN p[x,z]:} } \\
-  &Var[z|x < thr]    \approx \sigma_z^2 + \rho \, (thr-E[x]) \, (\mu_1 - E[z]) - (\mu_1 - E[z])^2, \\
-  &Var[z|x \geq thr] \approx \sigma_z^2 + \rho \, (thr-E[x]) \, (\mu_2 - E[z]) - (\mu_2 - E[z])^2,
-  (\#eq:VarzcondApproxGaussian)
+  &\underline{ \textrm{VARIANCES OF BIVARIATE GAUSSIAN p[x,z]:} } \\
+  &Var[z|x < thr]    = \sigma_z^2 + \rho \, (thr-E[x]) \, (\mu_1 - E[z]) - (\mu_1 - E[z])^2, \\
+  &Var[z|x \geq thr] = \sigma_z^2 + \rho \, (thr-E[x]) \, (\mu_2 - E[z]) - (\mu_2 - E[z])^2,
+  (\#eq:VarzcondGaussian)
 \end{aligned}
 \end{equation}
 
-where $\mu_1 = E[z|x < thr]$ and $\mu_2 = E[z|x \geq thr]$ for which the approximations were given in Eq. \@ref(eq:EzcondApproxGaussian).
+where $\mu_1 = E[z|x < thr]$ and $\mu_2 = E[z|x \geq thr]$ for which the formulas were given in Eq. \@ref(eq:EzcondGaussian).
 
 ```{r}
   PRA0_Gauss <- function( m.=m, S.=S, thr.=thr ) {
