@@ -1393,7 +1393,7 @@ Now we define the algorithm $\texttt{PRA3}$ for the three-component PRA:
 And here are the results for our virtual dataset.
 
 ```{r}
-  PRAst <- PRA3( x, z, thr ) ; PRAst
+  PRAst <- PRA3( x, z, thr ) ; round(PRAst,3)
 ```
 
 
@@ -1531,7 +1531,7 @@ See Fig. \@ref(fig:PRAcont).
     abline( v=thr, col="red", lty=2 )
 
 # Extension 2025-02-17, 2025-06-30   
-  plot( v.seq, p.seq, type="l", xlab="v = E[loss]", xlim=c(-0.5,2), main="p[ E[loss] ]", ylim=c(0,0.4)  )
+  plot( v.seq, p.seq, type="l", xlab="E[loss] = V", xlim=c(-0.5,2), main="p[ E[loss] ]", ylim=c(0,0.4)  )
 ```
 
 
