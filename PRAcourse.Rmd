@@ -335,7 +335,7 @@ We use the following histogram-grid function to show sample data from the joint 
   n_G3  <- 1e3 ; Sigma_G3 <- matrix(0.5,nrow=3,ncol=3) ; diag(Sigma_G3) <- 1
   xz_G3 <- rmvnorm( n_G3, c(0,0,0), Sigma_G3 )
 
-  pairs(xz_G3, diag.panel=panel.hist, label="" ) ; cor(xz_G3)
+  pairs(xz_G3, diag.panel=panel.hist, label="" ) ; round( cor(xz_G3), 3 )
 ```
 
 
@@ -1285,14 +1285,16 @@ Example: multiple tree diseases that may occur together in a forest, or drought 
 ## Trivariate Gaussian Dataset
 
 ```{r}
-  PRAi( xz_G3, c(0,0) )
+  round( PRAi(xz_G3,c(0,0))$cat, 3 )
+  round( PRAi(xz_G3,c(0,0))$sum, 3 )
 ```
+
+Note: even in the case of the trivariate Gaussian (and zero-thresholds), p[ x2 | x1<0 ] is not a Gaussian. To understand the results of the PRAi on the trivariate Gaussian dataset, it is still useful to derive a formula for the probability of joint hazardousness p[x2<0|x1<0], i.e. the joint cumulative distribution function. Check @Mee_1983_Simple for an estimate of this. Continue that line of thinking to develop distribution-based multi-hazard PRA.
 
 ## Dataset with two uncorrelated hazard variables that exert correlated V
 
 ```{r, fig.height=4}
   set.seed(1)
-
   n  <- 1e2
   x1 <- rbeta( n, 3, 3 ) ; x2 <- rbeta( n, 3, 3 )
   z  <- as.integer( x1 >= 0.5 | x2 >= 0.5 )
@@ -1304,7 +1306,7 @@ Example: multiple tree diseases that may occur together in a forest, or drought 
 ```{r}
   thr <- c( 0.5, 0.5 )
 
-  PRAi( xz, thr )
+  round( PRAi( xz, thr )$cat, 3 )
 ```
 
 ## Bayesian alternative for hazard probability
@@ -2945,6 +2947,8 @@ We get information about one of the variables. What is then our posterior for th
   solA <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
   
   # Numerical solutions:
+  set.seed(1)
+  
   pA   <- 0.9 ; pB_A <- 0.9 ; pB_a <- 0.6 ; pC_B <- 0.9 ; pC_b <- 0.2
   n    <- 1e6
   x    <- rbinom( n, 1, pA )
@@ -2953,11 +2957,11 @@ We get information about one of the variables. What is then our posterior for th
   pB   <- sum(y==1) / n                ; pC   <- sum(z==1) / n
   pB_a <- sum(x==0 & y==1) / sum(x==0) ; pC_a <- sum(x==0 & z==1) / sum(x==0)
   pA_b <- sum(x==1 & y==0) / sum(y==0) ; pC_b <- sum(y==0 & z==1) / sum(y==0)
-  pA_c <- sum(z==1 & z==0) / sum(z==0) ; pB_c <- sum(y==1 & z==0) / sum(z==0) 
+  pA_c <- sum(x==1 & z==0) / sum(z==0) ; pB_c <- sum(y==1 & z==0) / sum(z==0) 
   solN <- rbind( c(pB,pC), c(pB_a,pC_a), c(pA_b,pC_b), c(pA_c,pB_c) )
   
   # Comparison:
-  round( cbind( solA, solN ), 2 )
+  round( cbind( solA, solN ), 3 )
 ```
 
 
