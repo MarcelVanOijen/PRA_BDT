@@ -417,7 +417,7 @@ bibliography: PRA_BDT.bib
   par( mfrow=c(2,3), mar=c(1,1,1,3) )
 
   plot( mean(s_prec4), main="mean(prec)", xaxt="n", yaxt="n") ; plot( gadm5, add=T)
-  plot( mean(s_U4   ), main="mean(U4)"  , xaxt="n", yaxt="n") ; plot( gadm5, add=T)
+  plot( mean(s_U4   ), main="mean(u)"   , xaxt="n", yaxt="n") ; plot( gadm5, add=T)
         
   plot( r_Q4 , main="Q" , xaxt="n", yaxt="n",
         col=terrain.colors(100,rev=T) )                    ; plot( gadm5, add=T)
