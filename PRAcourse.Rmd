@@ -1,13 +1,13 @@
 ---
 title: "Probabilistic Risk Analysis and Bayesian Decision Theory"
-subtitle: "NOTEBOOK"
+subtitle: "Course Handout"
 author:
   - Marcel van Oijen^[Independent researcher, Edinburgh, UK - VanOijenMarcel@gmail.com]
   - Mark Brewer^[BioSS Office, The James Hutton Institute, Craigiebuckler, Aberdeen AB15 8QH]
 date: '`r Sys.Date()`'
 knit: "rmarkdown::render"
 output: bookdown::pdf_document2
-# csl: environmental-modelling-and-software.csl
+csl: environmental-modelling-and-software.csl
 bibliography:
   - PRA_BDT.bib
 ---
@@ -38,36 +38,29 @@ bibliography:
 
 
 \clearpage
-# Practicalities
+# Course content
 
-## My lectures
-- Can I use my own MBP, i.e. can my laptop screen be projected?
+## Downloadable material
 
-## Where, When, Who
-- Course: Lubeck 2025-09-24 to 26.
-- Travel: out 2025-09-23, return 2025-09-27.
-- Local organisers:
-  - Reinard Vonthein (Lubeck, mathematics of medicine and life sci.)
-  - Tobias Mette (Freising, interested in GAM)
-  - Gerhard Nehmiz (Bieberach, mathematics, biostatistics)
-  - Wolfgang Falk
+- GitHub: **https://github.com/MarcelVanOijen/PRA_BDT**
 
-## Prerequisites
-- R and R Studio installed
-- PRAbook code tested?
-  - New GitHub repository
-- Participants will be familiar with R, but let them know which R-packages need to be installed.
-- Make slides freely available to all!
+## References
 
-## Material for participants to download
+- Main references: @VanOijen_2022_Probabilistic ('PRA-BDT') and @VanOijen_2024_Bayesian chapters 18 and 19 ('BC2').
+- Other previous publications: @VanOijen_2024_Bayesian, @VanOijen_2019_Probabilistic, @VanOijen_2019_Tools, @VanOijen_2014_Impact, @VanOijen_2013_novel.
+- Some publications that use (parts of) our PRA approach explicitly: @Ren_2023_Risk, @Nandintsetseg_2021_Risk, @He_2021_Drought, @Zhou_2018_Drought, @Kuhnert_2017_Impact, @Liu_2020_new, @Nandintsetseg_2024_Future.
 
+### @VanOijen_2022_Probabilistic: Errata
 
-\clearpage
-# Lectures
+- p.14: the text refers to 'Monte Carlo' (MC) four times but the approach is based on numerical solutions to the conditional expectation values without any MC sampling.
+- p.21, 4.3: "any deviation ... $E[z \geq thr]$" should be ... $E[z|x \geq thr]$. 
+- pp.13-14,27, Eqs 2.7, 2.8 and 4.5: these are not approximations but exact, so appropriate changes in equations and text must be made.
+- p.27: "$Var[z|x < thr] = 1 + \rho \, thr \, E[z] - E[z]^2$" should have conditional expectations on the right: "$... = 1 + \rho \, thr \, E[z|x < thr] - E[z|x<thr]^2$".
+- p.27,Eq.4.5: The equations as written give a value equal to 1 for the conditional variances if $\rho = 0$ and $thr \to \infty$ resp. $thr \to -\infty$. The proper limits are $\sigma^2_z$ so that is what both appearances of "$1$" should be replaced by.
+- p.59, Eq.11.1: the four $R_e$ should each be $Q$.
 
 ## Agenda
-
-We aim to cover the following six topics:
+We cover the following six topics:
 
 1. Introduction to PRA: Basic ideas & equations (**BC2: 18.1-18.6, PRA-BDT: 1-9**)
 2. Model-based PRA (incl. NIMBLE example Spain) (**PRA-BDT: 7**)
@@ -76,121 +69,21 @@ We aim to cover the following six topics:
 5. Links between PRA and BDT (**BC2: 19.4, PRA-BDT: 16-17**)
 6. General discussion (**BC2: 25.1, PRA-BDT: 19**)
 
-There will be four sessions of 1.5 hours each, so some sessions will cover multiple topics. The progress through the material will be decided together with the audience, but roughly we can expect the following scheduling of the topics:
+With four sessions of 1.5 hours each, a possible schedule could be:
 
-Session I  : 1
-Session II : 2
-Session III: 2,3
-Session IV : 4,5,6
+- Session I  : 1
+- Session II : 2
+- Session III: 2,3
+- Session IV : 4,5,6
 
-We aim to include exercises in each session to initiate discussion.
-
-## Content ideas
-- Briefly summarise our previous work: @VanOijen_2024_Bayesian, @VanOijen_2022_Probabilistic, @VanOijen_2019_Probabilistic, @VanOijen_2019_Tools, @VanOijen_2014_Impact, @VanOijen_2013_novel.
-- Show examples from other authors who used (parts of) our PRA approach explicitly: @Ren_2023_Risk, @Nandintsetseg_2021_Risk, @He_2021_Drought, @Zhou_2018_Drought, @Kuhnert_2017_Impact, @Liu_2020_new, @Nandintsetseg_2024_Future.
-- Study examples (with pictures) of published risk analyses that do NOT use our PRA approach and ask: do these risk analyses distinguish and quantify $x, z, p[x], p[z], E[x], E[z], E[x|..], E[z|..], V, R$?
-  - Fun different example: risk of large meteorite hitting the earth [https://www.nasa.gov/solar-system/asteroids/asteroid-fast-facts/; @Wheeler_2024_Risk]
-- In structuring the course, mainly follow BC2, Chapters 18 and 19 [@VanOijen_2024_Bayesian].
-  - For additional material, see also our notes on @VanOijen_2022_Probabilistic in the next chapter of this document, and the other chapters on specific topics.
-- What **not** to include? (Maybe mention briefly but do not treat in any depth.)
-  - Gerhard suggests not to include copulas. But note that an additional use of copulas (besides our use in expressing p[x,z]) may be in spatial upscaling of local risks to larger areas [@Hochrainer-Stigler_2019_Large].
-  - Extreme value theory.
-- Add a line-plot of $E[z|x]$ and for the multi-threshold PRA also a barplot with the set of x-interval conditional expectations for $z$, i.e $E[z|thr_{i-1} \leq x < thr_i]$ where $i=1,..,n$ and $thr_0=-\infty$.
-- Revive fingerprint-analysis for bifactorial hazard (or for mean and s.d. of hazard).
-- Mention Bayesian packages?
-  - brms
-  - BayesX (developed and used in Germany)
-    - https://cran.r-project.org/web/packages/BayesX/index.html
-    - https://www.rdocumentation.org/packages/BayesXsrc/versions/3.0-6
-  - ...
-- Can NIMBLE be linked to external PBMs?
-- Should Bayesian approaches to regression (incl. machine learning, CART) be mentioned?
-  - https://proceedings.mlr.press/r1/chipman97a.html
-- Can fault-tree-analysis (FTA, the nuclear industry's form of PRA) be carried out within our PRA framework? Maybe FTA can be seen as a decomposition of the hazard probability?
-  - https://pipelinepodcastnetwork.com/probabilistic-risk-analysis/
-- Do we need to think about exchangeability? See blog posts by Jessica Hullman and the reference in the comments there to Jaynes' article about the de Finetti representation theorem. Exchangeability is also covered in Jaynes' book. 
-  - https://statmodeling.stat.columbia.edu/2025/03/26/individual-probability-model-multiplicity-and-multicalibration/?utm_source=substack&utm_medium=email
-- When carrying out PRA, can my standard time-series analysis (replication over time) be replaced by a spatial analysis (replication over space)?
-- Mention increasing role of machine learning?
-  - @Salcedo-Sanz_2023_Analysis: "Analysis, Characterization, Prediction and Attribution of Extreme Atmospheric Events with Machine Learning: a Review"
-- When to normalise V and R? Loss can be expressed in absolute terms (e.g. m^3 ha-1 y-1) or relative terms (%, where 100% is equated with $\overline{z_{\neg H}}$)? Generally it may be good to normalise, but it may lead to confusion in case of spatially distributed PRA if we normalise every cell separately. Assessing total risk over the whole area then becomes complicated.
-  - Do we also have such problems with area-integration if we use local measures of p[H], such as the SPEI?
-- Marcel to keep discussion of Bayes and model-based PRA very short: will be covered by Mark.
-- In the PowerPoint file: use the term 'Graphical Model' (GM) throughout rather than BBN.
-- After presenting different forms of PRA (e.g. sampling-, distribution-, and model-based PRA for the German *Picea abies* data), ask why the results differ. Which method seems most reliable? More generally, what prior information does each method require?
-- BDT explained simply: http://www.statsathome.com/2017/10/12/bayesian-decision-theory-made-ridiculously-simple/
-- We show, in paragraph 2.1.1 (p.10) of @VanOijen_2022_Probabilistic that a uniform hazard distribution together with a linear response function leads to constant V irrespective of the choice of threshold. Maybe show this as a simple example of distribution- and model-based PRA?
-
-### PRA using forest data
-- Explain all variants of PRA by applying them to forest mortality.
-- Show naive PRA on time series German forest death (Thunen institute) and point out that *domain knowledge* is essential. For example, in a simplistic PRA we would ignore the cumulative effects that have led to droughts in recent years becoming more damaging than earlier droughts. In other words, annual drought levels should not be viewed as constituting independent hazard occurrences.
-- ANotHer simplistic aspect: ignoring correlations between different environmental variables such as drought and heat and disease and pests. This is not always wrong: if the correlations are very strong than we can indeed treat them as one compound hazard. But generally the correlations are weak to moderate so *different hazard variables should not be lumped*.
-- Include the topic of *reporting the results* from PRA. Examine how to put the results of PRA in accurate, informative and easily understandable language. Show how the PRA is useful to a forest manager.
-
-### Mark's PRA for the Spanish data (Nimble example)
-- Demonstrate practical application of the PRA to real data from Spain.
-- Develop the Nimble approach of PRAbook Ch. 7 into a large realistic case-study. Use Manuel’s Spanish data that Mark wanted to analyse anyway with our methods. So that would be for both the course and a publication. That example will be of interest to the audience because many of them likely work on climate extremes impacts on German forests.
-- Extend to data from Germany and Finland? Like Spain, these countries have long-term data on forest growth, so the three countries together could be used to analyse environmental risks in different climates.
-
-
-\clearpage
-# @VanOijen_2022_Probabilistic
-
-## Errata
-- p.14 refers to 'Monte Carlo' (MC) four times but the approach here is based on numerical solutions to the conditional expectation values without any MC sampling.
-- p.21, 4.3 "any deviation ... $E[z \geq thr]$" should be ... $E[z|x \geq thr]$. (But note that the whole equation for $\sigma_R$ may be simplified, see next section on book improvements.)
-- Eqs 2.7, 2.8 and 4.5 are not approximations but exact. Make appropriate changes in text and equations. For example, change the first sentence of 2.3 from "Even though in the case of the bivariate Gaussian no closed-form solution exists for the distribution of z given that x is below or above a threshold, there is an approximation formula for ..." to "If $p[x,z]$ is a bivariate Gaussian, then $p[z|x]$ is a Gaussian too, but the two distributions that we need for PRA, i.e. $p[z|x<thr]$ and $p[z| \ge thr]$, are not Gaussian. However there are closed-form solutions for the means and variances of these two distributions (e.g. @Mee_1983_Simple), which we show here in their most general form."
-- There are errors in text, equations and underlying code of section 4.7 (pp. 26-27).
-  - **Text**: "...approximately estimating ... The same authors also provided a formula to approximate the conditional variance for the same distribution: $Var[z|x < thr] = 1 + \rho \, thr \, E[z] - E[z]^2$" should not refer to approximation (the formulas are exact) and have conditional expectations on the right: "$... = 1 + \rho \, thr \, E[z|x < thr] - E[z|x<thr]^2$".
-  - **Equation 4.5**: The equations as written give a value equal to 1 for the conditional variances if $\rho = 0$ and $thr \to \infty$ resp. $thr \to -\infty$. The proper limits are $\sigma^2_z$ so that is what both appearances of "$1$" should be replaced by. 
-  - **Code**: In the underlying code (not shown in the book) for functions $\texttt{Varz\_xbelowAppr}$ and $\texttt{Varz\_xaboveAppr}$, the calculation of $\texttt{Varzxbelow}$ resp. $\texttt{Varzxabove}$ should operate on $\texttt{mx.}$ and $\texttt{mz.}$ instead of $\texttt{mx}$ and $\texttt{mz}$. And for consistence we may also prefer to use $\texttt{thr.}$ and $\texttt{r.}$ rather than $\texttt{thr}$ and $\texttt{r}$ as function arguments. The old argument-names will generally not cause problems but should be changed anyway. When also correcting the above-mentioned equation-errors, the corrected code becomes:
-    - $\texttt{Varzxbelow}$ <- Vz. + r. * (thr.-mx.) * (Ezxbelow-mz.) - (Ezxbelow-mz.)^2
-    - $\texttt{Varzxabove}$ <- Vz. + r. * (thr.-mx.) * (Ezxabove-mz.) - (Ezxabove-mz.)^2
-- Eq. 11.1 is (very) wrong: the four $R_e$ should each be $Q$. So correct the equation and extend the paragraph with a test of the corrected equation on virtual data from a known joint spatial distribution $p[x_i,z_i]$ for an 8x8 grid, just like the other examples in the chapter.
-
-## Improvements
-- Mention a new location for downloadable R-code (i.e. my Zenodo/GitHub), and
-explain where errors were corrected and for which topics additional code is provided.
-- Include exercises?
-- Remove Eq. 2.2 (not used anywhere), and modify Eq. 2.1 (any term involving $x|z$ is confusing) such that it more clearly leads to the current Eq. 2.3.
-- Chapter ordering is confusing: better start from the structure of BC2 Ch. 18, or from the order used in this document.
-- Move paragraphs 2.3 and 4.7 to Ch. 5? And then simplify the title of that chapter to "Distribution-Based Single-Threshold PRA" or just "Distribution-Based PRA".
-- p.21, 4.3. Replace Eq. 4.4 with the simpler $\sigma^2_R = \sigma^2_{p[H]} \sigma^2_V + \sigma^2_{p[H]} V^2 + p[H]^2 \sigma^2_V$.
-  - The same simplification for s_R can be introduced in the R-function of p.28.
-- Also UQ to the sampling-based multi-threshold PRA of Ch.8. This can use the above-mentioned new formula: $\sigma^2_{R[i]} = \sigma^2_{p[H[i]]} \sigma^2_{V[i]} + \sigma^2_{p[H[i]]} V[i]^2 + p[H[i]]^2 \sigma^2_{V[i]}$.
-- Provide some Bayesian justification for our treatment of UQ in sampling based-PRA, in particular Eqs 3.1 and 4.1 of the PRAbook. Those are unbiased estimators (which need not be the best estimators at all, see e.g. @Jaynes_2003_Probability or @Oliphant_2006_Bayesian). Note that the problem of "measuring" a population mean using a finite sample with sampling uncertainty from population variation is similar to that of measuring the value of a parameter from repeated measurements with measurement uncertainty. Both problems are somewhat difficult if a priori not only the mean but also the variance among individual observations is unknown. We could then still use conjugate analysis using a Normal-Gamma prior (for mean and *precision*) leading to a marginal posterior Student's distribution for the mean (@Murphy_2007_Conjugate) which is reasonably well approximated by our Eqs 3.1 and 4.1 if prior uncertainty is high. For a comparison of the Bayesian treatment with other methods, see Oliphant (2006).
-- If we consistently point out Bayesian justifications for our formulas, we can rename the book "Bayesian Risk Analysis and Decision Theory".
-- Interactions: include examples where the p[H]_i and/or the V_{ij} are not independent.
-  - Check my handwritten notes on that (separate A4).
-  - Spatially interacting hazards: see my remarks about that at the end of the book (paragraph 19.8) with reference to Timonina-Farkas et al. (2013, 2015). Also check the literature for newer publications by the same authors (maybe already in my Zotero library).
-- Code of Ch. 7: simplify where possible and make consistent with coding conventions in rest of the book (e.g. use of the term 'pH' rather than 'xweight' etc.).
-- The function PRAm (formerly PRAn) now produces a list of length 2, containing a summary vector, and a matrix with results for all thresholds.
-- Our user-defined R-functions:
-  - Be consistent in argument-naming: always have a decimal point at the end. So write $\texttt{x., z., m., S., thr., thr.seq.}$ etc.
-  - Rename our R-functions: we should assume that UQ is always required in PRA, so no need to have ".UQ" at the end of algorithm-names. The few examples of code that do not include UQ should perhaps be removed.
-- We formerly used the beta distribution to model uncertainty about hazard probability pH, but often summarise its posterior as mean plus-minus standard deviation. Better to calculate the 95% credibility interval associated with the asymmetric posterior beta distribution. [Or do not use the beta distribution at all but leave it at standard sampling theory.]
-- Does Ch. 5 add anything substantial to what was already explained in section 4.7?
-- Update references, e.g. replace @VanOijen_2020_Bayesian by @VanOijen_2024_Bayesian.
-- In the Discussion chapter summarise the key differences between sampling-, distribution-, and model-based PRA, in both formulation and applicability.
-  - Only the latter two specify a function $E[z|x]$, and they are in fact closely related. For example, a Gaussian bivariate distribution is equivalent to a linear regression model.
-  - Sampling-based PRA is easiest to apply, but that brings its own risks: it is necessarily non-Bayesian and thus does not have a prior that can keep results sensible even if there are only few data.
-- More generally, explain the value of Bayesian approaches to PRA and BDT.
-- Remove sections on model emulation? It is not specific to PRA and/or BDT.
-
-### BDT
-- Include a decision tree (although most variables in our book are continuous including the action levels such as irrigation).
-- The GM of @VanOijen_2024_Bayesian Fig. 19.1 seems more natural than its predecessor Fig. 12.1 of @VanOijen_2022_Probabilistic.
-  - Include a DAG for PRA (simply x -> z), then a very simple one for BDT ({a,x} -> z with {a,z} -> u), then the one for Fig. 19.1 and explain that we can add detail as we see fit, commensurate with our knowledge of the system. Make clear that we can have the action 'a' operate on any subset of {x, z, u}. For example, if a is irrigation we could model that as an extra resource affecting the system 'z', but also as management that increases environmental water availability {x}.  
-  - Mention the two key values of DAG for BDT:
-    - 1. Visual representation of joint probability distribution,
-    - 2. Showing *conditional* independencies as pairs of nodes without an arrow between them, affording an easy way to factorise the joint distribution.
+We include exercises in each session to have some (active) breaks and to initiate discussion.
 
 
 
 \clearpage
 # Data
 
-We use several virtual and one real dataset in this notebook.
+We use several virtual datasets and one real one in this notebook.
 
 ### Sparse Dataset: $\texttt{\{x\_4,z\_4\}}$
 We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit variances and covariance 0.5 as follows:
@@ -293,9 +186,11 @@ We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit
 
 ### German Forestry Data: $\texttt{x\_r3, z\_Fs, z\_Q, z\_Pa, z\_Ps}$
 
-```{r, fig.height=4}
+```{r}
   d.data        <- "data_Germany/"
+```
 
+```{r, eval=F}
   file.data     <- paste0( d.data, "2-bis-7_abb-tab_nsh_2024-04-08.xlsx" )
   sheet.data    <- "5_Daten" ; r.data <- "B120:C153"
   y_r           <- read_excel( file.data, sheet=sheet.data, range=r.data, col_names=F )
@@ -307,14 +202,21 @@ We create a sparse dataset (n=4) for $\{x,z\}$ that has a zero mean vector, unit
   colnames(y_m) <- c( "year", "mort.%_Fs", "mort.%_Q", "mort.%_Pa", "mort.%_Ps" )
   y_r_m         <- cbind( y_r, y_m[ , startsWith( colnames(y_m), "mort" ) ] )
 
-  # Annual mortality vs. summer rain of last three years
+  # Annual mortality and summer rain of last three years
   meanlast <- function(v,k){as.vector(filter(v,f=rep(1/k,k),s=1))}
   n    <- dim(y_r_m)[1] ; k <- 3 
   x_r3 <- meanlast(y_r_m[,"rain.mm"],k)[k:n]
-  
   z_Fs <- y_r_m[k:n,"mort.%_Fs"] ; z_Q  <- y_r_m[k:n,"mort.%_Q" ]
   z_Pa <- y_r_m[k:n,"mort.%_Pa"] ; z_Ps <- y_r_m[k:n,"mort.%_Ps"]
-  
+
+  save( x_r3, z_Fs, z_Q, z_Pa, z_Ps, file=paste0(d.data,"xz_Germany.RData" ) )
+```
+
+```{r}
+  load( paste0( d.data, "xz_Germany.RData" ) )
+```
+
+```{r, fig.height=4}
   par ( mfrow=c(2,2), mar=c(4,4,1,2) )
   plot( x_r3, z_Fs, main="Fs", xlab=""         , ylab="mortality (%)" )
   plot( x_r3, z_Q , main="Q" , xlab=""         , ylab=""              )
@@ -627,7 +529,7 @@ The above formulas for conditional means and variances of the bivariate Gaussian
     return( c( pH=pH, V=V, R=R ) ) }
 ```
 
-So whenever we are certain that the joint distribution $p[x,z]$ is well represented by $N[\mu,\Sigma]$, the function call $\texttt{PRA\_Gauss(mu,Sigma,thr)}$ would give us our PRA. But generally we only have a sample from $\{x,z\}$ and even if we are convinced that a bivariate Gaussian is suitable, we then still have uncertainty about the hyperparameters of the distribution. So we need a probability distribution for the hyperparameters. For this, we use a conjugate Bayesian approach where the posterior distribution can be calculated analytically from the sample mean vector $m$ and covariance matrix $S$.
+So whenever we are certain that the joint distribution $p[x,z]$ is well represented by $N[\mu,\Sigma]$, the function call $\texttt{PRA0\_Gauss(mu,Sigma,thr)}$ would give us our PRA. But generally we only have a sample from $\{x,z\}$ and even if we are convinced that a bivariate Gaussian is suitable, we then still have uncertainty about the hyperparameters of the distribution. So we need a probability distribution for the hyperparameters. For this, we use a conjugate Bayesian approach where the posterior distribution can be calculated analytically from the sample mean vector $m$ and covariance matrix $S$.
 
 Say that our data are $y=\{x_i,z_i\}, i=1..n$ with $m = (\overline{x},\overline{z})$ and $S = cov(x,z)$. If we assign an uninformative Jeffreys prior $p[\mu,\Sigma] \propto |\Sigma|^{-3/2}$, then the posterior is an inverse Wishart distribution for $\Sigma$ times a conditionally normal distribution for $\mu$ (e.g. @Gelman_2013_Bayesian). Concretely, $p[\Sigma|y] = IWi_{n-1}(S'^{-1})$ and $p[\mu|\Sigma,y] = N[m,\Sigma/n]$, where $S'=(n-1)S$ is the sample sum of squares matrix.
 
@@ -1437,11 +1339,10 @@ Our example will be similar to the second of the two examples shown in the chapt
 - $x \sim U[0,3]$
 - $E[z|x] = 1-e^{-x}$
 
-```{r}
-  par( mfrow=c(1,1), mar=c(4,4,4,4) )
+```{r, fig.height=2.5}
+  par( mfrow=c(1,2), mar=c(4,4,1,4) )
 
-  curve( 1-exp(-x), xlim=c(0,3), ylab="", main="E[z|x]",
-         cex.main=2, cex.axis=2, cex.lab=2, lwd=2 )
+  curve( 1-exp(-x), xlim=c(0,3), ylab="", main="E[z|x]" )
 ```
 
 The model-based continuous zero-threshold PRA-equations then become:
@@ -2639,10 +2540,10 @@ $$ YC = 10 * (1-exp(-R/1000)) * (1-A/1000) $$
 ```
 
 ```{r, echo=T}
-  ky        <- 30 ; ka <- 0.1
+  kz <- 30 ; ka <- 0.1
 
-  s_U_DEU       <- s_YC_DEU       * ky
-  s_U.IRRIG_DEU <- s_YC.IRRIG_DEU * ky - IRRIG * ka
+  s_U_DEU       <- s_YC_DEU       * kz
+  s_U.IRRIG_DEU <- s_YC.IRRIG_DEU * kz - IRRIG * ka
 ```
 
 ```{r U3yearsDEU, fig.height=3.2, out.width="100%", fig.align="center", fig.cap="\\label{U3yearsDEU}Utility in 2000, 2001 and 2018. Top row: no irrigation. Bottom row: irrigation at 500 $mm \\, y^{-1}$."}
@@ -2799,7 +2700,7 @@ $$ YC = 10 * (1-exp(-R/1000)) * (1-A/1000) $$
 
   plot( mean(s_prec4_DEU), main="mean(prec)", xaxt="n", yaxt="n",
         col=map.pal("ryb"), range=c(0,1700))   ; plot( gadm5, add=T)
-  plot( mean(s_U4_DEU   ), main="mean(U4)"  , xaxt="n", yaxt="n",
+  plot( mean(s_U4_DEU   ), main="mean(u)"  , xaxt="n", yaxt="n",
         col=map.pal("ryg"), range=c(0, 200))   ; plot( gadm5, add=T)
         
   plot( r_Q4_DEU , main="Q" , xaxt="n", yaxt="n",
@@ -2982,7 +2883,8 @@ The following R-code chunks are minor modifications of code for Chapter 12.3 of 
 ```{r BDTa, echo=FALSE, out.width="50%", fig.height=5, fig.align="center", fig.cap="\\label{fig::BDTa}Utility as a function of action $a$ for a negative exponential performance function and linear cost and benefit functions."}
   par( mfrow=c(1,1), mar=c(4,2,3,0) )
 
-  a.seq <- seq( 0, 3, length.out=31 )
+  na    <- 31
+  a.seq <- seq( 0, 3, length.out=na )
   u.seq <- u(a.seq)
   imaxu <- which( u.seq == max(u.seq) ) ; amaxu <- a.seq[imaxu]
   plot( a.seq, u.seq, xlab="a", ylab="", main="Utility\n(no uncertainty)",
@@ -3037,11 +2939,11 @@ The following R-code chunks are minor modifications of code for Chapter 12.3 of 
   u.tbl1  <- u.tbl2 <- u.tbl3 <- NULL
   for(i in 1:np) {
     u.tbl1 <- rbind( u.tbl1,
-      u( a.seq, x.smp1[i], t.smp1[i], e.smp1[i], ka.smp1[i], ky.smp1[i] ) )
+      u( a.seq, x.smp1[i], t.smp1[i], e.smp1[i], ka.smp1[i], kz.smp1[i] ) )
     u.tbl2 <- rbind( u.tbl2,
-      u( a.seq, x.smp2[i], t.smp2[i], e.smp2[i], ka.smp2[i], ky.smp2[i] ) )
+      u( a.seq, x.smp2[i], t.smp2[i], e.smp2[i], ka.smp2[i], kz.smp2[i] ) )
     u.tbl3 <- rbind( u.tbl3,
-      u( a.seq, x.smp3[i], t.smp3[i], e.smp3[i], ka.smp3[i], ky.smp3[i] ) )
+      u( a.seq, x.smp3[i], t.smp3[i], e.smp3[i], ka.smp3[i], kz.smp3[i] ) )
   }
   
   uQlo.seq1 <- sapply( 1:na, function(i) { quantile( u.tbl1[,i], probs=Qlo ) } )
@@ -3163,18 +3065,9 @@ The matrices will be clustered more closely around $\texttt{sgm}$ if we choose a
   cat( "\nThe sample's mean matrix is:\n" )   ; round( msmpl2, 3 )
 ```
 
-## GLM
-
-```{r}
-  x1 <- rnorm( 30 )
-  x2 <- rnorm( 30, 0, 10 )
-  LP <- 1 + x1 + x2/5
-  z  <- 1 / ( 1 + exp(-LP) ) ; hist(z)
-  
-  glm(z ~ x1 + x2, family=binomial(link=logit) )
-```
-
 ## Weather data
+
+Acquiring weather data remains problematic. The following methods provide some access but with various limitations.
 
 ```{r, eval=F}
   library(geodata)
