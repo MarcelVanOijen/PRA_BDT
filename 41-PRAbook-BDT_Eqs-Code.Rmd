@@ -5,7 +5,7 @@ author:
   - Mark Brewer^[BioSS Office, The James Hutton Institute, Craigiebuckler, Aberdeen AB15 8QH]
 knit: "rmarkdown::render"
 output: pdf_document
-# csl: environmental-modelling-and-software.csl
+csl: environmental-modelling-and-software.csl
 bibliography: PRA_BDT.bib
 ---
 
