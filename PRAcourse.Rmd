@@ -46,8 +46,8 @@ bibliography:
 
 ## References
 
-- Main references: @VanOijen_2022_Probabilistic ('PRA-BDT') and @VanOijen_2024_Bayesian chapters 18 and 19 ('BC2').
-- Other previous publications: @VanOijen_2024_Bayesian, @VanOijen_2019_Probabilistic, @VanOijen_2019_Tools, @VanOijen_2014_Impact, @VanOijen_2013_novel.
+- Main references: **@VanOijen_2022_Probabilistic** ('PRA-BDT') and @VanOijen_2024_Bayesian chapters 18 and 19 ('BC2').
+- Other previous publications: @VanOijen_2019_Probabilistic, @VanOijen_2019_Tools, @VanOijen_2014_Impact, @VanOijen_2013_novel.
 - Some publications that use (parts of) our PRA approach explicitly: @Ren_2023_Risk, @Nandintsetseg_2021_Risk, @He_2021_Drought, @Zhou_2018_Drought, @Kuhnert_2017_Impact, @Liu_2020_new, @Nandintsetseg_2024_Future.
 
 ### @VanOijen_2022_Probabilistic: Errata
@@ -277,6 +277,30 @@ Sampling-based PRA requires a sufficiently large dataset to allow calculation of
 
   x <- c( 200, 400, 600, 800 ) ; z <- c(  70,  80,  90, 100 )
   PRA( x, z, 500 )
+```
+
+Here is a plotting function for those cases where we have, in one vector, all six values of a standard sampling-based single-threshold PRA: $pH,V,R,s_{pH},s_V,s_R$.
+
+```{r}
+  plotPRA <- function( pra ) {
+    # This function requires 'pra' to be a vector c(pH,V,R,s_pH,s_V,s_R)
+    mpH <- pra[1] ; mVR <- pra[2:3] ; spH <- pra[4] ; sVR <- pra[5:6]
+    par( mfrow=c(1,2) )
+    bpH  <- barplot( mpH, xlim=c(0,1), ylim=range(0,mpH+2*spH),
+                     col="red", width=0.5 )
+    segments( bpH, mpH-spH, bpH, mpH+spH ) ; ew <- bpH / 4
+    segments( bpH-ew, mpH-spH, bpH+ew, mpH-spH )
+    segments( bpH-ew, mpH+spH, bpH+ew, mpH+spH )
+    bVR  <- barplot( mVR, ylim=range(0,mVR-2*sVR,mVR+2*sVR), beside=T,
+                     col=c("cyan","yellow") )
+    segments( bVR, mVR-sVR, bVR, mVR+sVR ) ; ew <- (bVR[2,1]-bVR[1,1]) / 4
+    segments( bVR-ew, mVR-sVR, bVR+ew, mVR-sVR )
+    segments( bVR-ew, mVR+sVR, bVR+ew, mVR+sVR )
+  }
+```
+
+```{r}
+  plotPRA( PRA( x, z, 500 ) )
 ```
 
 ## Multi-threshold PRA
@@ -1999,6 +2023,18 @@ Sampling-based single-threshold PRA for survival = 100 - mortality (%):
   PRA_Ss.Q  <- PRA( x_r3, 100-z_Q , thr )
   PRA_Ss.Pa <- PRA( x_r3, 100-z_Pa, thr )
   PRA_Ss.Ps <- PRA( x_r3, 100-z_Ps, thr )
+```
+
+```{r}
+           PRA(  x_r3, 100-z_Pa,  thr )   # Standard approach here
+           PRA(  x_r3,    -z_Pa,  thr )
+           PRA(  x_r3,     z_Pa,  thr )
+           PRA( -x_r3,     z_Pa, -thr )
+  
+  plotPRA( PRA(  x_r3, 100-z_Pa,  thr ) ) # Standard approach here
+  plotPRA( PRA(  x_r3,    -z_Pa,  thr ) )
+  plotPRA( PRA(  x_r3,     z_Pa,  thr ) )
+  plotPRA( PRA( -x_r3,     z_Pa, -thr ) )
 ```
 
 ```{r}

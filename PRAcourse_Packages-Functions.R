@@ -110,6 +110,23 @@
   PRA( x, z, 500 )
   x <- c( 200, 400, 600, 800 ) ; z <- c(  70,  80,  90, 100 )
   PRA( x, z, 500 )
+  
+  plotPRA <- function( pra ) {
+    # This function requires 'pra' to be a vector c(pH,V,R,s_pH,s_V,s_R)
+    mpH <- pra[1] ; mVR <- pra[2:3] ; spH <- pra[4] ; sVR <- pra[5:6]
+    par( mfrow=c(1,2) )
+    bpH  <- barplot( mpH, xlim=c(0,1), ylim=range(0,mpH+2*spH),
+                     col="red", width=0.5 )
+    segments( bpH, mpH-spH, bpH, mpH+spH ) ; ew <- bpH / 4
+    segments( bpH-ew, mpH-spH, bpH+ew, mpH-spH )
+    segments( bpH-ew, mpH+spH, bpH+ew, mpH+spH )
+    bVR  <- barplot( mVR, ylim=range(0,mVR-2*sVR,mVR+2*sVR), beside=T,
+                     col=c("cyan","yellow") )
+    segments( bVR, mVR-sVR, bVR, mVR+sVR ) ; ew <- (bVR[2,1]-bVR[1,1]) / 4
+    segments( bVR-ew, mVR-sVR, bVR+ew, mVR-sVR )
+    segments( bVR-ew, mVR+sVR, bVR+ew, mVR+sVR )
+  }
+  plotPRA( PRA( x, z, 500 ) )
 
   PRAm <- function( x, z, thr=-1:1 ) {
     n   <- length(x) ; n_thr <- length(thr)
@@ -827,7 +844,9 @@
   PRA_Ss.Q  <- PRA( x_r3, 100-z_Q , thr )
   PRA_Ss.Pa <- PRA( x_r3, 100-z_Pa, thr )
   PRA_Ss.Ps <- PRA( x_r3, 100-z_Ps, thr )
-
+  
+  plotPRA( PRA( x_r3, 100-z_Pa, thr ) )
+  
   PRA._ <- as.matrix( cbind(PRA_Ss.Fs, PRA_Ss.Q, PRA_Ss.Pa, PRA_Ss.Ps) )
   colnames(PRA._) <- c( "Fs", "Q", "Pa", "Ps" )
   m     <- PRA._[1:3,] ; s <- PRA._[4:6,]
